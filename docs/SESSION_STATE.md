@@ -1,5 +1,5 @@
 # Session State
-_Cập nhật: 2026-10-02 · Spec vừa xong: 003 · Spec tiếp theo: 004_
+_Cập nhật: 2026-10-02 · Spec vừa xong: 004 · Spec tiếp theo: 005_
 
 ## Tiến độ
 | Spec | Feature | Trạng thái | Tests (pass/total) | Analyze (warnings) | Ngày |
@@ -7,7 +7,7 @@ _Cập nhật: 2026-10-02 · Spec vừa xong: 003 · Spec tiếp theo: 004_
 | 001 | Project foundation & bộ nhớ dự án | DONE | 2/2 | 0 | 2026-10-01 |
 | 002 | Core primitives | DONE | 12/12 | 0 | 2026-10-01 |
 | 003 | Budget engine | DONE | 74/74 (engine) / 80/80 (total) | 0 | 2026-10-02 |
-| 004 | Data layer | TODO | – | – | – |
+| 004 | Data layer | DONE | 29/29 (flutter) / 75/75 (engine) / 104/104 (total) | 0 | 2026-10-02 |
 | 005 | App shell | TODO | – | – | – |
 | 006 | Splash & bootstrap | TODO | – | – | – |
 | 007 | Onboarding welcome | TODO | – | – | – |
@@ -123,11 +123,84 @@ Trạng thái: TODO · IN_PROGRESS (<bước>) · BLOCKED (<lý do>) · DONE
     final goalProgress = snapshot.goalProgress;         // GoalProgress?
     final upcomingBills = snapshot.upcomingBills;       // List<BillOccurrence>
     ```
+- **Sơ đồ bảng cơ sở dữ liệu (Drift SQLite - Spec 004):**
+  - **Cột chung đồng bộ (`CommonSyncTable`):** Mọi bảng nghiệp vụ kế thừa 5 cột:
+    - `id` (TEXT, PK, UUID v4)
+    - `created_at` (INTEGER, epoch ms UTC)
+    - `updated_at` (INTEGER, epoch ms UTC)
+    - `deleted_at` (INTEGER, epoch ms UTC, nullable: null = active, not null = soft deleted)
+    - `device_id` (TEXT, UUID v4 nhận diện thiết bị)
+
+  - **Sơ đồ quan hệ thực thể (ERD text):**
+    ```text
+    +-------------------------------------------------------------------------------+
+    |                               BUDGET_PROFILES                                 |
+    | id (PK) | currency | income_mode | pay_frequency | pay_anchor_date            |
+    | income_per_paycheck_cents | first_period_balance_cents | starting_balance_cents |
+    | tracking_start_date | safety_horizon_days | buffer_percent | rollover_mode       |
+    | timezone | week_start | onboarding_completed                                  |
+    | [CommonSyncTable: created_at, updated_at, deleted_at, device_id]              |
+    +-------------------------------------------------------------------------------+
+           |                                |                           |
+      1    |                           1    |                      1    |
+           v N                              v N                         v 1..N
+    +---------------------------+   +-----------------------+   +-------------------+
+    |         EXPENSES          |   |         BILLS         |   |       GOALS       |
+    | id (PK)                   |   | id (PK)               |   | id (PK)           |
+    | profile_id (FK logic)     |   | profile_id (FK logic) |   | profile_id (FK)   |
+    | amount_cents (INT > 0)    |   | name (TEXT)           |   | name (TEXT)       |
+    | spent_on (YYYY-MM-DD)     |   | amount_cents (INT)    |   | target_amount_    |
+    | category_id (FK logic) ---+   | recurrence (TEXT)     |   |   cents (INT)     |
+    | note (TEXT?)              |   | first_due_date (TEXT) |   | target_date?      |
+    | source ('manual'/'widget')|   | remind_days_before    |   | per_paycheck_     |
+    | currency (TEXT)           |   | is_active (BOOL)      |   |   cents?          |
+    | [CommonSyncTable]         |   | [CommonSyncTable]     |   | created_on (TEXT) |
+    +---------------------------+   +-----------------------+   | is_active (BOOL)  |
+           |                                                    | [CommonSyncTable] |
+         N |                                                    +-------------------+
+           v 1 (optional)                                                 | 1
+    +---------------------------+                                         v N
+    |        CATEGORIES         |                               +-------------------+
+    | id (PK)                   |                               | GOAL_CONTRIBUTIONS|
+    | name_key (TEXT l10n)      |                               | id (PK)           |
+    | custom_name (TEXT?)       |                               | goal_id (FK logic)|
+    | icon (TEXT)               |                               | amount_cents (INT)|
+    | color (TEXT hex)          |                               | on_date (TEXT)    |
+    | sort_order (INT)          |                               | source ('manual') |
+    | is_default (BOOL)         |                               | [CommonSyncTable] |
+    | [CommonSyncTable]         |                               +-------------------+
+    +---------------------------+
+
+    +---------------------------+   +-----------------------------------------------+
+    |      INCOME_ENTRIES       |   |                 APP_SETTINGS                  |
+    | id (PK)                   |   | key (TEXT, PK thay cho id)                    |
+    | profile_id (FK logic)     |   | value (TEXT / JSON)                           |
+    | amount_cents (INT > 0)    |   | updated_at (INTEGER epoch ms UTC)             |
+    | received_on (YYYY-MM-DD)  |   | (Lưu device_id, theme, cấu hình cục bộ)       |
+    | note (TEXT?)              |   +-----------------------------------------------+
+    | [CommonSyncTable]         |
+    +---------------------------+
+    ```
+
+  - **Quy tắc thiết kế & bảo toàn dữ liệu (Data Layer):**
+    1. *Bất biến Soft Delete:* Mọi bảng nghiệp vụ kế thừa `CommonSyncTable` (`deleted_at` nullable). Mọi query đọc mặc định luôn lọc `WHERE deleted_at IS NULL`. Thao tác xóa ghi `deleted_at = nowMs, updated_at = nowMs`. Tuyệt đối không xóa cứng trong bất kỳ repository nghiệp vụ nào (ngoại lệ duy nhất: key-value `app_settings` và chức năng "Erase all data" Spec 017).
+    2. *Undo tức thì:* Hỗ trợ khôi phục bản ghi đã xóa nhầm qua `restore(id)` (`deleted_at = NULL, updated_at = nowMs`).
+    3. *Bảo toàn tiền tệ:* Cột lưu trữ luôn là số nguyên cents `amount_cents` (`int`), ánh xạ 2 chiều sang `Money(cents, currency)`.
+    4. *Idempotent Category Seeder:* Khởi tạo 8 danh mục mặc định (`Food & Drink`, `Groceries`, `Transport`, `Shopping`, `Fun`, `Bills & Utilities`, `Health`, `Other`), an toàn chạy lại nhiều lần mà không bị nhân đôi dữ liệu.
+    5. *Background Isolate:* Runtime database sử dụng `NativeDatabase.createInBackground(file)` kết hợp `path_provider` để không bao giờ chặn main UI isolate. Unit test dùng `NativeDatabase.memory()`.
+    6. *Reactive Pipeline (`BudgetSnapshotService`):* Gộp stream từ các repository (`CombineLatestStream.combine4`), debounce tự động, gọi pure `computeSnapshot`, expose qua `Rx<BudgetSnapshot?> snapshot`. Presentation Controllers tuyệt đối **KHÔNG** import hay gọi trực tiếp `computeSnapshot` từ `budget_engine`.
+    7. *Xử lý lỗi Reactive & Bảo mật:* `IBudgetSnapshotService` cung cấp `Rx<String?> error`. Mọi lỗi stream hoặc tính toán snapshot đều chuyển sang state lỗi và ghi log qua `dart:developer` (tuyệt đối không kèm số tiền, ghi chú hay dữ liệu PII).
+    8. *Cách thêm Migration:*
+       - Bước 1: Tăng `schemaVersion` trong `AppDatabase` (ví dụ: `int get schemaVersion => 2;`).
+       - Bước 2: Chạy lệnh xuất schema dump: `dart run drift_dev schema dump lib/data/db/app_database.dart drift_schemas/drift_schema_v2.json`.
+       - Bước 3: Triển khai các bước chuyển đổi schema trong `MigrationStrategy(onUpgrade: (m, from, to) async { ... })`.
+       - Bước 4: Viết test migration trong `test/data/db/migration_test.dart` dùng `schema.stepByStep` hoặc `validateDatabaseSchemaFromSchemaDump` để bảo đảm dữ liệu cũ không bị thất thoát.
+    9. *Schema Dump Versioning:* Schema drift được dump tại `drift_schemas/drift_schema_v1.json` để kiểm thử hồi quy migration cho các phiên bản tiếp theo.
 - **Quy ước Git:** Xong mỗi spec (tính năng), USER sẽ tự thực hiện `git commit` và `git push` code. Agent tuyệt đối không tự ý chạy git commit hoặc push.
 
 ## Known issues / Tech debt
-- Không có issue hoặc tech debt phát sinh từ Spec 003. Đạt 100% test pass (80/80 tests), coverage `packages/budget_engine` đạt 95.40%, 0 analyze issue.
-- Các tính năng mở rộng ngoài MVP (như `dueOnWeekendShift`, multi-goals, irregular rollover) đã được ghi nhận trong `docs/BACKLOG.md`.
+- Không có issue hoặc tech debt phát sinh từ Spec 004. Đạt 100% test pass (104/104 tests: 29 flutter + 75 engine), 0 analyze issue (zero-warning), 100% DoD đạt.
+- Các tính năng mở rộng ngoài MVP (như `dueOnWeekendShift`, multi-goals, irregular rollover, FTS5 cho note chi tiêu, Cloud sync 2 chiều) đã được ghi nhận trong `docs/BACKLOG.md`.
 
 ## Next
-- Spec 004 · Data layer (drift schema, DAO, repository) (file `specs/004-data-layer.md`).
+- Spec 005 · App shell: theme, router, l10n, component chung (file `specs/005-app-shell.md`).

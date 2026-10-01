@@ -23,16 +23,17 @@ extension LocalDateFromDateTime on LocalDate {
   /// ```
   static LocalDate fromDateTime(DateTime dateTime, String timezoneName) {
     if (!_initialized) {
-      try {
-        tz.getLocation(timezoneName);
-        _initialized = true;
-      } on Exception catch (_) {
-        tz_data.initializeTimeZones();
-        _initialized = true;
-      }
+      tz_data.initializeTimeZones();
+      _initialized = true;
     }
 
-    final location = tz.getLocation(timezoneName);
+    tz.Location location;
+    try {
+      location = tz.getLocation(timezoneName);
+    } on Object catch (_) {
+      location = tz.UTC;
+    }
+
     final tzDateTime = tz.TZDateTime.from(dateTime, location);
     return LocalDate(tzDateTime.year, tzDateTime.month, tzDateTime.day);
   }

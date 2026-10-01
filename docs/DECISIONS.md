@@ -28,3 +28,14 @@
 - Quyết định: Chế độ `irregular` luôn tính lại hạn mức ngày linh hoạt từ số dư thực tế chia đều cho cửa sổ an toàn $H$ (mặc định 14 ngày), tương đương cơ chế `spread` tự nhiên. Các chế độ `tomorrow` và `save` bị vô hiệu hóa cho `irregular` trong MVP.
 - Hệ quả: Đơn giản hóa mô hình tư duy tài chính cho người dùng thu nhập không đều, loại bỏ nguy cơ tích lũy thặng dư ảo khi dòng tiền không có chu kỳ cố định.
 
+## ADR-005: Dùng Tên Bảng `expense` Thay Cho `transaction`
+- Ngày: 2026-10-02 · Spec: 004
+- Bối cảnh: Ứng dụng quản lý các khoản chi tiêu hàng ngày của người dùng. Trong các hệ thống tài chính truyền thống, bảng lưu dữ liệu giao dịch thường được đặt tên là `transactions`.
+- Quyết định: Đặt tên bảng là `expenses` (`lib/data/db/tables/expenses_table.dart`) và model là `Expense`.
+- Lý do:
+  1. `transaction` là từ khóa dành riêng (reserved SQL keyword) trong SQLite và hầu hết các RDBMS (dùng cho `BEGIN TRANSACTION`, `COMMIT`, `ROLLBACK`), dễ gây lỗi cú pháp hoặc yêu cầu escape quotes (`[transaction]` / `"transaction"`) liên tục.
+  2. Về mặt ngữ nghĩa domain, ứng dụng Daily Safe-to-Spend tập trung vào việc theo dõi chi tiêu cá nhân để tính toán số tiền an toàn còn lại trong ngày; từ `expense` mô tả trực diện và chính xác hơn nghiệp vụ này so với từ chung chung `transaction`.
+  3. Thu nhập được tách riêng thành bảng `income_entries` nhằm phục vụ mô hình thu nhập không đều (irregular mode).
+- Hệ quả: Loại bỏ nguy cơ xung đột từ khóa SQL với Drift/SQLite, code DAO/Repository sạch hơn, không cần backticks hay ngoặc vuông bảo vệ từ khóa SQL.
+
+

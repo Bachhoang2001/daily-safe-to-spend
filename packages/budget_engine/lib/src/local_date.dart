@@ -57,6 +57,22 @@ class LocalDate implements Comparable<LocalDate> {
     return LocalDate(y, m, d);
   }
 
+  /// Parses an ISO-8601 date string formatted as `YYYY-MM-DD`, or returns `null` if invalid.
+  ///
+  /// Example:
+  /// ```dart
+  /// print(LocalDate.tryParse('invalid')); // null
+  /// print(LocalDate.tryParse('2026-03-15')); // LocalDate(2026, 3, 15)
+  /// ```
+  static LocalDate? tryParse(String? formatted) {
+    if (formatted == null) return null;
+    try {
+      return LocalDate.parse(formatted);
+    } on FormatException {
+      return null;
+    }
+  }
+
   /// Returns the number of days in the specified [year] and [month].
   ///
   /// Correctly handles leap years for February.

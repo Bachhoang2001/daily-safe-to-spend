@@ -10,3 +10,6 @@ Các ý tưởng, cải tiến và technical debt ghi nhận trong quá trình p
 - [ ] Engine - Hỗ trợ `dueOnWeekendShift` cho Bill: Tự động trượt ngày thanh toán sang thứ Hai kế tiếp nếu rơi vào Thứ Bảy / Chủ Nhật (Spec 003 MVP cố định đúng ngày hạn `dueDay`).
 - [ ] Engine - Hỗ trợ nhiều mục tiêu tiết kiệm đồng thời (`List<Goal>`): MVP hiện tại tối đa 1 mục tiêu tiết kiệm đang hoạt động.
 - [ ] Engine - Mở rộng Rollover Mode cho chế độ Thu nhập không đều (Irregular): Cho phép người dùng irregular chọn Tomorrow boost hoặc Save it thay vì chỉ áp dụng cơ chế Spread tự nhiên.
+- [ ] Data layer - Hỗ trợ Full-text search (SQLite FTS5) cho ghi chú chi tiêu (`note`) khi người dùng tích lũy hàng nghìn giao dịch sau thời gian dài sử dụng.
+- [ ] Data layer - Tự động đồng bộ hai chiều (Bi-directional Cloud Sync) ở Giai đoạn 3 (đã chuẩn bị sẵn cấu trúc `CommonSyncTable` với `id`, `device_id`, `updated_at`, `deleted_at`).
+

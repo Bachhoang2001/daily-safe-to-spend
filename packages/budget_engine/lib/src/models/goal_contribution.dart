@@ -18,6 +18,9 @@ class GoalContribution {
   /// Optional memo or description.
   final String? note;
 
+  /// Source of the contribution (e.g. 'manual', default: 'manual').
+  final String source;
+
   /// Creates an immutable [GoalContribution].
   const GoalContribution({
     required this.id,
@@ -25,6 +28,7 @@ class GoalContribution {
     required this.amount,
     required this.onDate,
     this.note,
+    this.source = 'manual',
   });
 
   @override
@@ -36,12 +40,13 @@ class GoalContribution {
           goalId == other.goalId &&
           amount == other.amount &&
           onDate == other.onDate &&
-          note == other.note;
+          note == other.note &&
+          source == other.source;
 
   @override
-  int get hashCode => Object.hash(id, goalId, amount, onDate, note);
+  int get hashCode => Object.hash(id, goalId, amount, onDate, note, source);
 
   @override
   String toString() =>
-      'GoalContribution(id: $id, goalId: $goalId, amount: $amount, onDate: $onDate)';
+      'GoalContribution(id: $id, goalId: $goalId, amount: $amount, onDate: $onDate, source: $source)';
 }

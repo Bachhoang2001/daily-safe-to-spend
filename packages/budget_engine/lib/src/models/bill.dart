@@ -19,6 +19,9 @@ class Bill {
   /// Date of the first occurrence of this bill.
   final LocalDate firstDueDate;
 
+  /// Number of days before due date to remind the user (default 1).
+  final int remindDaysBefore;
+
   /// Whether this bill is currently active.
   final bool isActive;
 
@@ -29,6 +32,7 @@ class Bill {
     required this.amount,
     required this.recurrence,
     required this.firstDueDate,
+    this.remindDaysBefore = 1,
     this.isActive = true,
   });
 
@@ -42,13 +46,21 @@ class Bill {
           amount == other.amount &&
           recurrence == other.recurrence &&
           firstDueDate == other.firstDueDate &&
+          remindDaysBefore == other.remindDaysBefore &&
           isActive == other.isActive;
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, amount, recurrence, firstDueDate, isActive);
+  int get hashCode => Object.hash(
+    id,
+    name,
+    amount,
+    recurrence,
+    firstDueDate,
+    remindDaysBefore,
+    isActive,
+  );
 
   @override
   String toString() =>
-      'Bill(id: $id, name: $name, amount: $amount, recurrence: $recurrence, firstDue: $firstDueDate)';
+      'Bill(id: $id, name: $name, amount: $amount, recurrence: $recurrence, firstDue: $firstDueDate, remindDaysBefore: $remindDaysBefore)';
 }

@@ -45,5 +45,20 @@ void main() {
         expect(feb28Leap.daysUntil(mar1Leap), equals(2));
       },
     );
+
+    test(
+      'tryParse parses valid ISO-8601 strings and returns null for invalid',
+      () {
+        expect(
+          LocalDate.tryParse('2026-03-15'),
+          equals(const LocalDate(2026, 3, 15)),
+        );
+        expect(LocalDate.tryParse(null), isNull);
+        expect(LocalDate.tryParse(''), isNull);
+        expect(LocalDate.tryParse('invalid'), isNull);
+        expect(LocalDate.tryParse('2026-02-30'), isNull);
+        expect(LocalDate.tryParse('2026-13-01'), isNull);
+      },
+    );
   });
 }
