@@ -4,7 +4,7 @@
 > **Đọc kèm bắt buộc:** `specs/000-conventions.md` (kiến trúc GetX, quy ước, Design System, DoD chung)
 > **Chạy bằng:** `specs/AGENT-RUNBOOK.md` → mục Spec 001
 > **Phụ thuộc:** không có · **Ước lượng:** 0,5 ngày
-> **Trạng thái:** TODO
+> **Trạng thái:** DONE
 
 ---
 
