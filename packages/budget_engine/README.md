@@ -13,7 +13,42 @@ Package Dart thuần (Pure Dart) chứa toàn bộ lõi thuật toán tính toá
 
 ---
 
-## 2. Các chế độ thu nhập & Ví dụ Đầu vào → Đầu ra
+## 2. Các kiểu dữ liệu nền tảng (Core Primitives)
+
+### `Money` (`src/money.dart`)
+* Bất biến (immutable), lưu trữ số tiền dưới dạng số nguyên `cents` (ví dụ: `$12.50 = 1250` cents).
+* Đi kèm mã tiền tệ chuẩn ISO 4217 (`USD`, `EUR`, `GBP`...).
+* Hỗ trợ đầy đủ các phép toán số học `+`, `-`, đổi dấu `-()`, và các toán tử so sánh `<`, `<=`, `>`, `>=`.
+* **An toàn loại tiền tệ (Currency Safety):** Phép tính giữa hai số tiền khác loại tiền tệ sẽ ném ngoại lệ `CurrencyMismatchError`.
+* **`divideEvenly(int parts)`:** Phân bổ phần dư cents cho các phần tử đầu tiên sao cho tổng các phần tử luôn bảo toàn chính xác bằng `cents` gốc.
+  ```dart
+  const total = Money(1000); // $10.00
+  final split = total.divideEvenly(3);
+  // [Money(334), Money(333), Money(333)] -> tổng = 1000
+  ```
+* **`percent(int p)`:** Tính phần trăm và luôn làm tròn **xuống** (floor) đến cent gần nhất để giữ tính an toàn cho quỹ dự phòng.
+  ```dart
+  const amount = Money(999);
+  final buffer = amount.percent(10); // Money(99)
+  ```
+
+### `LocalDate` (`src/local_date.dart`)
+* Bất biến (immutable), đại diện cho ngày dương lịch thuần túy (`year`, `month`, `day`).
+* Không chứa múi giờ hay giờ/phút/giây, không bị ảnh hưởng bởi Daylight Saving Time (DST).
+* Hỗ trợ `parse('YYYY-MM-DD')` và `toIsoString()`.
+* **`addMonths(int months)`:** Tự động kẹp về ngày cuối cùng của tháng mới (clamping) khi tháng đích có ít ngày hơn:
+  ```dart
+  const jan31 = LocalDate(2026, 1, 31);
+  jan31.addMonths(1); // 2026-02-28 (năm thường)
+  const jan31Leap = LocalDate(2028, 1, 31);
+  jan31Leap.addMonths(1); // 2028-02-29 (năm nhuận)
+  ```
+* **`daysUntil(LocalDate other)`:** Tính số ngày giữa hai mốc thời gian một cách chuẩn xác qua ranh giới tháng, năm và năm nhuận.
+* Các toán tử so sánh thời gian: `isBefore`, `isAfter`, `isAtSameMomentAs`, `<`, `<=`, `>`, `>=`.
+
+---
+
+## 3. Các chế độ thu nhập & Ví dụ Đầu vào → Đầu ra
 
 ### A. Chế độ Thu nhập cố định (`IncomeMode.fixed`)
 
@@ -131,7 +166,7 @@ safeToday      = allowanceToday − spentToday
 
 ---
 
-## 3. Quy ước Kiểm thử (Verification & Test Coverage)
+## 4. Quy ước Kiểm thử (Verification & Test Coverage)
 
 Toàn bộ các trường hợp biên và tính bất biến toán học được kiểm chứng trong `packages/budget_engine/test/`:
 1. **Bất biến tổng tiền (Conservation of Money):**

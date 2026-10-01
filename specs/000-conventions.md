@@ -41,6 +41,7 @@ Agent **chỉ làm một spec mỗi lần**, theo thứ tự ở mục D. Không
 5. Mọi số liệu trong báo cáo (số test, số warning) phải lấy từ **lần chạy thật**, không ghi trước.
 6. Mọi số tiền dùng `Money` (cents, `int`). Mọi ngày nghiệp vụ dùng `LocalDate`. Không ngoại lệ.
 7. Không gửi số tiền, ghi chú, tên hóa đơn/mục tiêu ra ngoài thiết bị (analytics, log, crash report).
+8. **Quy ước Git:** Sau khi hoàn tất mỗi spec (hoặc tính năng), **USER sẽ tự thực hiện `git commit` và `git push` code**. Agent TUYỆT ĐỐI KHÔNG tự ý thực hiện commit hoặc push lên repository.
 
 ## A2. Lệnh chạy chuẩn
 

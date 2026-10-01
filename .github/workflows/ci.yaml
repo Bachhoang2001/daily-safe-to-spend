@@ -35,6 +35,9 @@ jobs:
       - name: Format Check
         run: dart format --output=none --set-exit-if-changed .
 
+      - name: Verify No Double for Money
+        run: make check-money
+
       - name: Analyze (App & Engine)
         run: |
           flutter analyze

@@ -11,6 +11,7 @@
 3. Sau bước **PLAN**, đọc mục Implementation Plan trong file spec trước khi cho chạy tiếp (đặc biệt Spec 003 Budget Engine).
 4. Sau bước **REVIEW & VERIFY**, chỉ chạy **REMEMBER** khi Review Report ghi 100% đạt.
 5. Nếu agent dừng vì câu hỏi chặn việc: trả lời, ghi quyết định vào `docs/DECISIONS.md` (nếu là quyết định thiết kế), rồi chạy lại bước đó.
+6. **Quy ước Git:** Xong mỗi spec (hoặc tính năng), **USER tự thực hiện commit + push code**. Agent KHÔNG tự ý chạy lệnh commit hoặc push lên repository.
 
 ## Vai trò & skill
 

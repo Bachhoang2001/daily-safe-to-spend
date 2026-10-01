@@ -4,6 +4,9 @@
 /// philosophy, completely free of any Flutter SDK, platform channels, or I/O.
 library;
 
+export 'src/local_date.dart';
+export 'src/money.dart';
+
 /// Current version of the budget engine package.
 const String budgetEngineVersion = '0.0.1';
 
