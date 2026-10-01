@@ -1,12 +1,12 @@
 # Session State
-_Cập nhật: 2026-10-01 · Spec vừa xong: 002 · Spec tiếp theo: 003_
+_Cập nhật: 2026-10-02 · Spec vừa xong: 003 · Spec tiếp theo: 004_
 
 ## Tiến độ
 | Spec | Feature | Trạng thái | Tests (pass/total) | Analyze (warnings) | Ngày |
 |------|---------|------------|--------------------|--------------------|------|
 | 001 | Project foundation & bộ nhớ dự án | DONE | 2/2 | 0 | 2026-10-01 |
 | 002 | Core primitives | DONE | 12/12 | 0 | 2026-10-01 |
-| 003 | Budget engine | TODO | – | – | – |
+| 003 | Budget engine | DONE | 74/74 (engine) / 80/80 (total) | 0 | 2026-10-02 |
 | 004 | Data layer | TODO | – | – | – |
 | 005 | App shell | TODO | – | – | – |
 | 006 | Splash & bootstrap | TODO | – | – | – |
@@ -55,11 +55,79 @@ Trạng thái: TODO · IN_PROGRESS (<bước>) · BLOCKED (<lý do>) · DONE
   - `FakeUuidGenerator(prefix: '...')`: Trả về ID tuần tự (`uuid-0001`, `uuid-0002`...).
 - **Quy chuẩn CI chặn `double` cho tiền:**
   - Lệnh `make check-money` kiểm tra static regex tự động, được tích hợp vào `make analyze` và GitHub Actions CI.
+- **Budget Engine (`packages/budget_engine`):**
+  - **Bảng tóm tắt công thức từng chế độ:**
+    | Chế độ | Công thức tính hạn mức ngày (`dailyLimit`) | Công thức Safe Today | Dự báo ngày mai (`tomorrowForecast`) |
+    |---|---|---|---|
+    | **Fixed · Spread** | $\max(0, \lfloor P_{\text{rem}} / D_{\text{rem}} \rfloor)$ với $P_{\text{rem}}$ giảm trừ theo thực chi hàng ngày | $\text{dailyLimit} - \text{spentToday}$ | San đều phần dư/thâm hụt còn lại cho các ngày tiếp theo: $\max(0, \lfloor (P_{\text{rem}} - \text{spentToday}) / (D_{\text{rem}} - 1) \rfloor)$ |
+    | **Fixed · Tomorrow boost** | $\max(0, \text{base}_d + (\text{base}_{d-1} - \text{spent}_{d-1}))$ | $\text{dailyLimit} - \text{spentToday}$ | Số dư chưa tiêu hôm nay dồn toàn bộ sang ngày mai: $\max(0, \text{base}_{d+1} + \text{safeToday})$ |
+    | **Fixed · Save it** | $\text{base}_d$ (cố định theo lịch ban đầu). Thừa ngày trước gom vào tiết kiệm (`derivedGoalSaved`). Thiếu ngày trước trừ vào các ngày sau. | $\text{dailyLimit} - \text{spentToday}$ | Dự kiến ngày mai: $\max(0, \text{base}_{d+1} - \max(0, \text{spentToday} - \text{dailyLimit}))$ |
+    | **Irregular** | $\max(0, \lfloor \text{pool} / H \rfloor)$ với $H = 14$ ngày (safety horizon), $\text{pool} = \max(0, \text{balance} - \text{reserved})$ | $\text{baseDaily} - \text{spentToday}$ | Tự động tính lại hàng ngày theo số dư thực tế và cửa sổ an toàn trượt $H$ ngày |
+  - **Các bất biến của Engine (Financial & Computational Invariants):**
+    1. *Bảo toàn tổng tiền (Spread & Tomorrow Boost - T02-21):* $\sum_{d=1}^{D} \text{spent}_d + \text{remainingInPeriod} = \text{Pool}$ (sai số 0 cent qua 1.000 kịch bản ngẫu nhiên).
+    2. *Bảo toàn tổng tiền (Save it mode - T02-21b):* $\sum_{d=1}^{D} \text{spent}_d + \text{derivedGoalSaved} + \text{remainingInPeriod} = \text{Pool}$ (sai số 0 cent qua 500 kịch bản ngẫu nhiên).
+    3. *Không thất thoát cent lẻ (T02-22):* Mọi phép chia đều pool cho các ngày đều dùng `divideEvenly(parts)`, phân bổ phần dư cents tuần tự cho các ngày đầu tiên.
+    4. *Kẹp an toàn tài chính (Floor / Truncation):* Tiền đệm buffer (`percent`), hạn mức ngày, dự báo ngày mai và `remainingInPeriod` luôn $\ge 0$. Khi tiêu vượt, `safeToday < 0` phản ánh đúng mức bội chi và trạng thái chuyển sang `BudgetStatus.over`.
+    5. *Tính toán phi trạng thái và tất định (Stateless & Deterministic):* Không import Flutter/GetX, không gọi `DateTime.now()`, không I/O, cùng một `EngineInput` và `today` luôn ra cùng một `BudgetSnapshot`.
+  - **Cách gọi `computeSnapshot`:**
+    ```dart
+    import 'package:budget_engine/budget_engine.dart';
+
+    final input = EngineInput(
+      config: BudgetConfig(
+        currency: 'USD',
+        incomeMode: IncomeMode.fixed,
+        payFrequency: PayFrequency.biweekly,
+        payAnchorDate: LocalDate(2026, 1, 2),
+        incomePerPaycheck: Money.usd(300000), // $3,000.00
+        trackingStartDate: LocalDate(2026, 1, 2),
+        rolloverMode: RolloverMode.spread,
+        bufferPercent: 5, // 5% đệm
+      ),
+      expenses: [
+        Expense(
+          id: 'e-1',
+          amount: Money.usd(4500),
+          spentOn: LocalDate(2026, 1, 5),
+        ),
+      ],
+      bills: [
+        Bill(
+          id: 'b-1',
+          name: 'Internet',
+          amount: Money.usd(8000),
+          recurrence: BillRecurrence.monthly,
+          firstDueDate: LocalDate(2026, 1, 10),
+        ),
+      ],
+      goal: Goal(
+        id: 'g-1',
+        name: 'Emergency Fund',
+        targetAmount: Money.usd(100000),
+        targetDate: LocalDate(2026, 6, 30),
+      ),
+      contributions: [],
+      incomes: [],
+    );
+
+    final today = LocalDate(2026, 1, 5);
+    final snapshot = computeSnapshot(input, today);
+
+    // Kết quả tính toán:
+    final safeToday = snapshot.safeToday;               // Money
+    final tomorrow = snapshot.tomorrowForecast;         // Money
+    final status = snapshot.status;                     // BudgetStatus.great | good | warning | over
+    final remaining = snapshot.remainingInPeriod;       // Money
+    final daysLeft = snapshot.daysLeftInPeriod;         // int
+    final baseline = snapshot.dailyBaseline;            // Money
+    final goalProgress = snapshot.goalProgress;         // GoalProgress?
+    final upcomingBills = snapshot.upcomingBills;       // List<BillOccurrence>
+    ```
 - **Quy ước Git:** Xong mỗi spec (tính năng), USER sẽ tự thực hiện `git commit` và `git push` code. Agent tuyệt đối không tự ý chạy git commit hoặc push.
 
 ## Known issues / Tech debt
-- Không có issue hoặc tech debt phát sinh từ Spec 002. Đạt 100% test pass (12/12) và 0 analyze issue.
-- Các tính năng mở rộng ngoài MVP đã ghi nhận trong `docs/BACKLOG.md`.
+- Không có issue hoặc tech debt phát sinh từ Spec 003. Đạt 100% test pass (80/80 tests), coverage `packages/budget_engine` đạt 95.40%, 0 analyze issue.
+- Các tính năng mở rộng ngoài MVP (như `dueOnWeekendShift`, multi-goals, irregular rollover) đã được ghi nhận trong `docs/BACKLOG.md`.
 
 ## Next
-- Spec 003 · Budget Engine (package Dart thuần) (file `specs/003-budget-engine.md`).
+- Spec 004 · Data layer (drift schema, DAO, repository) (file `specs/004-data-layer.md`).

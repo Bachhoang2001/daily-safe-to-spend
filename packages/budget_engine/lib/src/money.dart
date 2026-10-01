@@ -143,6 +143,15 @@ class Money implements Comparable<Money> {
   /// ```
   Money operator -() => Money(-cents, currency);
 
+  /// Multiplies this monetary amount by an integer [factor].
+  ///
+  /// Example:
+  /// ```dart
+  /// const base = Money(200);
+  /// print(base * 3); // Money(600, USD)
+  /// ```
+  Money operator *(int factor) => Money(cents * factor, currency);
+
   /// Whether this amount is strictly less than [other].
   ///
   /// Throws [CurrencyMismatchError] if currencies differ.
