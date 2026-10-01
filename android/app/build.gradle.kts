@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.daily_safe_to_spend"
+    namespace = "org.aveglobal.safetospend"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -15,20 +15,33 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.daily_safe_to_spend"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        applicationId = "org.aveglobal.safetospend"
+        minSdk = 26
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
+    buildFeatures {
+        resValues = true
+    }
+
+    flavorDimensions += "default"
+
+    productFlavors {
+        create("dev") {
+            dimension = "default"
+            applicationIdSuffix = ".dev"
+            resValue("string", "app_name", "Safe to Spend (Dev)")
+        }
+        create("prod") {
+            dimension = "default"
+            resValue("string", "app_name", "Daily Safe-to-Spend")
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
         }
     }

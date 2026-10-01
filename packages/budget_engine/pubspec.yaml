@@ -1,0 +1,11 @@
+name: budget_engine
+description: Pure Dart business logic & calculation engine for Daily Safe-to-Spend.
+version: 0.0.1
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.12.2 <4.0.0'
+
+dev_dependencies:
+  lints: ^5.1.1
+  test: ^1.25.8

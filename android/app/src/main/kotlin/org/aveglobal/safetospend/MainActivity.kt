@@ -1,4 +1,4 @@
-package com.example.daily_safe_to_spend
+package org.aveglobal.safetospend
 
 import io.flutter.embedding.android.FlutterActivity
 
