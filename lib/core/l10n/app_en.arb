@@ -3,5 +3,61 @@
   "appTitle": "Daily Safe-to-Spend",
   "@appTitle": {
     "description": "The title of the application"
+  },
+  "tabToday": "Today",
+  "@tabToday": {
+    "description": "Label for the Today tab in navigation bar"
+  },
+  "tabHistory": "History",
+  "@tabHistory": {
+    "description": "Label for the History tab in navigation bar"
+  },
+  "tabPlan": "Plan",
+  "@tabPlan": {
+    "description": "Label for the Plan tab in navigation bar"
+  },
+  "quickAdd": "Quick Add",
+  "@quickAdd": {
+    "description": "Title and action for quick expense entry"
+  },
+  "statusOnTrack": "On Track",
+  "@statusOnTrack": {
+    "description": "Budget health status indicating healthy spending"
+  },
+  "statusCaution": "Caution",
+  "@statusCaution": {
+    "description": "Budget health status indicating under 20% remaining"
+  },
+  "statusOver": "Overspent",
+  "@statusOver": {
+    "description": "Budget health status indicating negative remaining allowance"
+  },
+  "actionSave": "Save",
+  "@actionSave": {
+    "description": "Standard save button label"
+  },
+  "actionCancel": "Cancel",
+  "@actionCancel": {
+    "description": "Standard cancel button label"
+  },
+  "actionConfirm": "Confirm",
+  "@actionConfirm": {
+    "description": "Standard confirm button label"
+  },
+  "actionDelete": "Delete",
+  "@actionDelete": {
+    "description": "Standard delete button label"
+  },
+  "actionEdit": "Edit",
+  "@actionEdit": {
+    "description": "Standard edit button label"
+  },
+  "backspace": "Backspace",
+  "@backspace": {
+    "description": "Semantics label for keypad backspace button"
+  },
+  "doubleZero": "Double zero",
+  "@doubleZero": {
+    "description": "Semantics label for keypad 00 button"
   }
 }

@@ -99,6 +99,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Daily Safe-to-Spend'**
   String get appTitle;
+
+  /// Label for the Today tab in navigation bar
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get tabToday;
+
+  /// Label for the History tab in navigation bar
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get tabHistory;
+
+  /// Label for the Plan tab in navigation bar
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get tabPlan;
+
+  /// Title and action for quick expense entry
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Add'**
+  String get quickAdd;
+
+  /// Budget health status indicating healthy spending
+  ///
+  /// In en, this message translates to:
+  /// **'On Track'**
+  String get statusOnTrack;
+
+  /// Budget health status indicating under 20% remaining
+  ///
+  /// In en, this message translates to:
+  /// **'Caution'**
+  String get statusCaution;
+
+  /// Budget health status indicating negative remaining allowance
+  ///
+  /// In en, this message translates to:
+  /// **'Overspent'**
+  String get statusOver;
+
+  /// Standard save button label
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get actionSave;
+
+  /// Standard cancel button label
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get actionCancel;
+
+  /// Standard confirm button label
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get actionConfirm;
+
+  /// Standard delete button label
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get actionDelete;
+
+  /// Standard edit button label
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get actionEdit;
+
+  /// Semantics label for keypad backspace button
+  ///
+  /// In en, this message translates to:
+  /// **'Backspace'**
+  String get backspace;
+
+  /// Semantics label for keypad 00 button
+  ///
+  /// In en, this message translates to:
+  /// **'Double zero'**
+  String get doubleZero;
 }
 
 class _AppLocalizationsDelegate

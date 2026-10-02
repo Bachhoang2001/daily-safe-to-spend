@@ -32,6 +32,10 @@ abstract class IProfileRepository {
   /// or `false` otherwise.
   Future<bool> hasCompletedOnboarding();
 
+  /// Synchronously returns whether the user has completed onboarding,
+  /// based on cached state from bootstrap or recent mutation.
+  bool hasCompletedOnboardingSync();
+
   /// Updates the onboarding completion flag for the active profile.
   ///
   /// Setting [completed] to `true` marks the application as ready for main shell navigation.

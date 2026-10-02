@@ -1,5 +1,5 @@
 # Session State
-_Cập nhật: 2026-10-02 · Spec vừa xong: 004 · Spec tiếp theo: 005_
+_Cập nhật: 2026-10-02 · Spec vừa xong: 005 · Spec tiếp theo: 006_
 
 ## Tiến độ
 | Spec | Feature | Trạng thái | Tests (pass/total) | Analyze (warnings) | Ngày |
@@ -8,7 +8,7 @@ _Cập nhật: 2026-10-02 · Spec vừa xong: 004 · Spec tiếp theo: 005_
 | 002 | Core primitives | DONE | 12/12 | 0 | 2026-10-01 |
 | 003 | Budget engine | DONE | 74/74 (engine) / 80/80 (total) | 0 | 2026-10-02 |
 | 004 | Data layer | DONE | 29/29 (flutter) / 75/75 (engine) / 104/104 (total) | 0 | 2026-10-02 |
-| 005 | App shell | TODO | – | – | – |
+| 005 | App shell | DONE | 70/70 (flutter) / 75/75 (engine) / 145/145 (total) | 0 | 2026-10-02 |
 | 006 | Splash & bootstrap | TODO | – | – | – |
 | 007 | Onboarding welcome | TODO | – | – | – |
 | 008 | Onboarding income | TODO | – | – | – |
@@ -196,11 +196,57 @@ Trạng thái: TODO · IN_PROGRESS (<bước>) · BLOCKED (<lý do>) · DONE
        - Bước 3: Triển khai các bước chuyển đổi schema trong `MigrationStrategy(onUpgrade: (m, from, to) async { ... })`.
        - Bước 4: Viết test migration trong `test/data/db/migration_test.dart` dùng `schema.stepByStep` hoặc `validateDatabaseSchemaFromSchemaDump` để bảo đảm dữ liệu cũ không bị thất thoát.
     9. *Schema Dump Versioning:* Schema drift được dump tại `drift_schemas/drift_schema_v1.json` để kiểm thử hồi quy migration cho các phiên bản tiếp theo.
+- **App Shell, Routing & Design System (Spec 005):**
+  - **Danh sách Route (`lib/core/routes/app_routes.dart`):**
+    - `AppRoutes.splash` (`/splash`): Màn hình splash loader & bootstrap dịch vụ.
+    - `AppRoutes.onboardingWelcome` (`/onboarding/welcome`): Màn hình chào mừng onboarding.
+    - `AppRoutes.onboardingIncome` (`/onboarding/income`): Thiết lập nguồn thu & chu kỳ lương.
+    - `AppRoutes.onboardingBills` (`/onboarding/bills`): Khai báo hóa đơn định kỳ.
+    - `AppRoutes.onboardingResult` (`/onboarding/result`): Hiển thị hạn mức an toàn ngày đầu tiên tính được.
+    - `AppRoutes.root` (`/root`): Shell chính chứa 3 tab điều hướng (`IndexedStack`):
+      - Tab 0: **Today** (`TodayPagePlaceholder` — sẽ thay bằng màn Today ở Spec 011).
+      - Tab 1: **History** (`HistoryPagePlaceholder` — sẽ thay bằng màn History ở Spec 013).
+      - Tab 2: **Plan** (`PlanPagePlaceholder` — sẽ thay bằng màn Plan ở Spec 014, 015, 016).
+    - `AppRoutes.settings` (`/settings`): Cài đặt tài khoản & ứng dụng.
+    - `AppRoutes.paywall` (`/paywall`): Modal nâng cấp gói trả phí PRO.
+    - `AppRoutes.expenseEdit` (`/expense/edit`): Chỉnh sửa giao dịch (truyền id qua `arguments` hoặc `parameters`).
+    - *Quy ước Quick Add:* Quick Add mở bằng modal bottom sheet (`Get.bottomSheet`) qua `QuickAddLauncher.open()`, **tuyệt đối không** cấu hình thành một named route độc lập (tuân thủ `000-conventions.md` mục B3).
+  - **Cách đăng ký Page mới vào `AppPages` (`lib/core/routes/app_pages.dart`):**
+    1. Khai báo hằng số route trong `lib/core/routes/app_routes.dart`.
+    2. Viết Page và Binding tương ứng trong `lib/features/<feature>/pages/` và `bindings/`.
+    3. Thêm phần tử `GetPage` vào mảng `AppPages.pages`:
+       ```dart
+       GetPage<dynamic>(
+         name: AppRoutes.yourFeature,
+         page: () => const YourFeaturePage(),
+         binding: YourFeatureBinding(),
+         middlewares: [OnboardingMiddleware()], // Thêm middleware nếu route cần bảo vệ (yêu cầu hoàn tất onboarding)
+       ),
+       ```
+    4. *Cơ chế Fallback Route an toàn:* `AppPages.unknownRoute` được định nghĩa trỏ về `RootShellPage` bọc `OnboardingMiddleware` và gắn vào `GetMaterialApp(unknownRoute: AppPages.unknownRoute)`. Điều này ngăn chặn hoàn toàn lỗi crash `_TypeError: Null check operator used on a null value` trong GetX khi nhận URI hoặc intent bất thường từ hệ điều hành.
+  - **Danh sách Component dùng chung & Cách dùng (`lib/core/widgets/`):**
+    1. `AmountKeypad`: Bàn phím số 3x4 chuẩn ATM/POS (0–9, 00, xóa 1 số, giữ xóa hết bằng Timer). Tự động kẹp trần 99.999.999 cents ($999,999.99), rung nhẹ `HapticFeedback.lightImpact()`, có `Semantics` cho từng phím bấm. Timer giữ xóa được hủy sạch sẽ khi widget dispose.
+    2. `AmountText`: Hiển thị số tiền với font feature tabular figures (`FontFeature.tabularFigures()`), tự động chuyển màu theo `BudgetStatus` (`onTrack`: `#2E9E6A`, `caution`: `#D98E04`, `over`: `#C8553D`). Hỗ trợ cờ `showSign: true` để hiển thị dấu `+` / `-`.
+    3. `PrimaryButton`: Nút chính nổi bật, bo góc 14pt (`AppSpacing.buttonRadius`), chiều cao chuẩn 48pt ($\ge 44\text{pt}$), hỗ trợ `isLoading` hiển thị spinner và vô hiệu hóa khi disabled.
+    4. `SecondaryButton`: Nút phụ bo góc 14pt, viền border nhẹ hoặc nền surface variant, phản hồi haptic.
+    5. `CategoryChip`: Chip danh mục dạng pill (bo góc 999pt) với icon và màu nhận diện.
+    6. `SectionCard`: Thẻ card nền surface bo góc 20pt (`AppSpacing.cardRadius`), viền border mờ.
+    7. `EmptyState`: Khối trạng thái rỗng minh họa trực quan, kèm tiêu đề, thông điệp hướng dẫn và nút CTA hành động.
+    8. `ProgressRing`: Vòng tròn tiến độ ngân sách / mục tiêu tiết kiệm nét bo tròn, tự đổi màu theo trạng thái.
+    9. `PremiumBadge`: Huy hiệu "PRO" nhỏ gọn đánh dấu các tính năng cao cấp.
+    10. `AppBottomSheet`: Khung modal chuẩn với drag handle, bo góc trên 24pt, tự co giãn theo bàn phím (`isScrollControlled: true`).
+    11. `ConfirmDialog`: Hộp thoại xác nhận thao tác quan trọng với nút Hủy và Xác nhận rõ ràng.
+    12. `AppScaffold`: Bọc chuẩn SafeArea, màu nền theme và padding an toàn.
+  - **Thiết kế Deep Link (`safetospend://quick-add`):**
+    - Đã đăng ký scheme `safetospend` với host `quick-add` trong `ios/Runner/Info.plist` và `android/app/src/main/AndroidManifest.xml`.
+    - `DeepLinkService` được inject permanent trong `InitialBinding`, tự động kích hoạt lắng nghe trong `onInit()`, kiểm tra `hasCompletedOnboarding()` trước khi phát `QuickAddTriggerEvent`, có debounce 1.500ms chống trùng lặp sự kiện mở modal khi cold start hoặc runtime.
 - **Quy ước Git:** Xong mỗi spec (tính năng), USER sẽ tự thực hiện `git commit` và `git push` code. Agent tuyệt đối không tự ý chạy git commit hoặc push.
 
 ## Known issues / Tech debt
-- Không có issue hoặc tech debt phát sinh từ Spec 004. Đạt 100% test pass (104/104 tests: 29 flutter + 75 engine), 0 analyze issue (zero-warning), 100% DoD đạt.
-- Các tính năng mở rộng ngoài MVP (như `dueOnWeekendShift`, multi-goals, irregular rollover, FTS5 cho note chi tiêu, Cloud sync 2 chiều) đã được ghi nhận trong `docs/BACKLOG.md`.
+- Không có issue hoặc tech debt phát sinh từ Spec 005. Đạt 100% test pass (145/145 tests: 70 flutter + 75 engine), 0 analyze issue (zero-warning), 0 vi phạm double, 100% DoD đạt.
+- 4 lỗi tiềm ẩn cấp hệ thống đã được phát hiện và xử lý triệt để: thiếu OS scheme trong Info.plist & AndroidManifest.xml, GetX null check crash trên Android intent, thiếu tự động gọi `init()` trong `DeepLinkService`, và Timer leak guard trong `AmountKeypad`.
+- Các tính năng mở rộng ngoài MVP (như Universal Links cho web, `dueOnWeekendShift`, multi-goals, irregular rollover, FTS5 cho note chi tiêu, Cloud sync 2 chiều) đã được ghi nhận trong `docs/BACKLOG.md`.
 
 ## Next
-- Spec 005 · App shell: theme, router, l10n, component chung (file `specs/005-app-shell.md`).
+- Spec 006 · Splash & bootstrap (file `specs/006-splash-bootstrap.md`).
+

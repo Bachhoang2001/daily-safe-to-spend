@@ -83,18 +83,25 @@ class ProfileRepository implements IProfileRepository {
     } else {
       await _db.into(_db.budgetProfilesTable).insert(companion);
     }
+    _cachedOnboardingCompleted = profile.onboardingCompleted;
   }
+
+  bool _cachedOnboardingCompleted = false;
+
+  @override
+  bool hasCompletedOnboardingSync() => _cachedOnboardingCompleted;
 
   @override
   Future<bool> hasCompletedOnboarding() async {
     final profile = await getActiveProfile();
-    return profile?.onboardingCompleted ?? false;
+    return _cachedOnboardingCompleted = profile?.onboardingCompleted ?? false;
   }
 
   @override
   // Positional boolean complies with IProfileRepository interface definition.
   // ignore: avoid_positional_boolean_parameters
   Future<void> setOnboardingCompleted(bool completed) async {
+    _cachedOnboardingCompleted = completed;
     final existing = await getActiveProfile();
     if (existing != null) {
       final now = _clock.now().millisecondsSinceEpoch;
