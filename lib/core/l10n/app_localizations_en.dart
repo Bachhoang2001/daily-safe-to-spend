@@ -52,4 +52,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get doubleZero => 'Double zero';
+
+  @override
+  String get startupErrorTitle => 'Something went wrong';
+
+  @override
+  String get startupErrorMessage =>
+      'We were unable to initialize your local database. Please try again or contact support if the issue persists.';
+
+  @override
+  String get actionTryAgain => 'Try again';
+
+  @override
+  String get actionContactSupport => 'Contact support';
+
+  @override
+  String get loadingApp => 'Loading Daily Safe-to-Spend...';
 }

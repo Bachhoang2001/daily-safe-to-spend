@@ -183,6 +183,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Double zero'**
   String get doubleZero;
+
+  /// Title displayed when application bootstrap fails
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong'**
+  String get startupErrorTitle;
+
+  /// Explanation message displayed when application bootstrap fails
+  ///
+  /// In en, this message translates to:
+  /// **'We were unable to initialize your local database. Please try again or contact support if the issue persists.'**
+  String get startupErrorMessage;
+
+  /// Action button label to retry a failed operation
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get actionTryAgain;
+
+  /// Action button label to email customer support
+  ///
+  /// In en, this message translates to:
+  /// **'Contact support'**
+  String get actionContactSupport;
+
+  /// Accessibility label for loading splash screen
+  ///
+  /// In en, this message translates to:
+  /// **'Loading Daily Safe-to-Spend...'**
+  String get loadingApp;
 }
 
 class _AppLocalizationsDelegate

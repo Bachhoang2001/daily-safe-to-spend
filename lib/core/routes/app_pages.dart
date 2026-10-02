@@ -4,12 +4,14 @@ import 'package:safe_to_spend/core/routes/app_routes.dart';
 import 'package:safe_to_spend/core/routes/middlewares/onboarding_middleware.dart';
 import 'package:safe_to_spend/features/root/bindings/root_shell_binding.dart';
 import 'package:safe_to_spend/features/root/pages/root_shell_page.dart';
+import 'package:safe_to_spend/features/splash/bindings/splash_binding.dart';
+import 'package:safe_to_spend/features/splash/pages/splash_page.dart';
 
 /// Central route table configuration for GetX navigation.
 abstract class AppPages {
   AppPages._();
 
-  static const String initial = AppRoutes.root;
+  static const String initial = AppRoutes.splash;
 
   /// Fallback route handling unrecognized URLs and deep links safely.
   static final GetPage<dynamic> unknownRoute = GetPage<dynamic>(
@@ -22,8 +24,12 @@ abstract class AppPages {
   static final List<GetPage<dynamic>> pages = <GetPage<dynamic>>[
     GetPage<dynamic>(
       name: AppRoutes.splash,
-      page: () => const _PlaceholderScreen(title: 'Splash'),
+      page: () => const SplashPage(),
+      binding: SplashBinding(),
+      transition: Transition.fade,
+      transitionDuration: const Duration(milliseconds: 250),
     ),
+
     GetPage<dynamic>(
       name: AppRoutes.onboardingWelcome,
       page: () => const _PlaceholderScreen(title: 'Welcome'),
@@ -46,6 +52,13 @@ abstract class AppPages {
       binding: RootShellBinding(),
       middlewares: [OnboardingMiddleware()],
     ),
+    GetPage<dynamic>(
+      name: AppRoutes.today,
+      page: () => const RootShellPage(),
+      binding: RootShellBinding(),
+      middlewares: [OnboardingMiddleware()],
+    ),
+
     GetPage<dynamic>(
       name: AppRoutes.settings,
       page: () => const _PlaceholderScreen(title: 'Settings'),

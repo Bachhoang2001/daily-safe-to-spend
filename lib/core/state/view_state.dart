@@ -1,7 +1,13 @@
-/// Status enumeration for asynchronous view operations.
-enum ViewStatus {
+/// Standard view state enumeration for reactive controllers and UI views.
+///
+/// Follows `specs/000-conventions.md`:
+/// `enum ViewState { initial, loading, success, empty, error }`
+enum ViewState {
   /// Initial uninitialized state.
   initial,
+
+  /// Idle state (alias for initial).
+  idle,
 
   /// Asynchronous operation in progress.
   loading,
@@ -9,57 +15,24 @@ enum ViewStatus {
   /// Operation finished successfully.
   success,
 
+  /// Operation completed successfully but produced an empty dataset.
+  empty,
+
   /// Operation failed with an error.
-  error,
-}
+  error;
 
-/// Generic wrapper representing state, data, and error message for reactive UI views.
-class ViewState<T> {
-  const ViewState({
-    this.status = ViewStatus.initial,
-    this.data,
-    this.errorMessage,
-  });
+  /// Whether current state is [initial] or [idle].
+  bool get isInitial => this == ViewState.initial || this == ViewState.idle;
 
-  /// Factory for the initial state.
-  factory ViewState.initial() => const ViewState();
+  /// Whether current state is [loading].
+  bool get isLoading => this == ViewState.loading;
 
-  /// Factory for the loading state, optionally retaining previous data.
-  factory ViewState.loading([T? previousData]) =>
-      ViewState(status: ViewStatus.loading, data: previousData);
+  /// Whether current state is [success].
+  bool get isSuccess => this == ViewState.success;
 
-  /// Factory for the successful state with loaded [data].
-  factory ViewState.success(T data) =>
-      ViewState(status: ViewStatus.success, data: data);
+  /// Whether current state is [empty].
+  bool get isEmpty => this == ViewState.empty;
 
-  /// Factory for the error state with a user-friendly [message].
-  factory ViewState.error(String message, [T? previousData]) => ViewState(
-    status: ViewStatus.error,
-    errorMessage: message,
-    data: previousData,
-  );
-
-  /// Current execution status.
-  final ViewStatus status;
-
-  /// Associated data payload, if any.
-  final T? data;
-
-  /// User-friendly error message, populated when status is [ViewStatus.error].
-  final String? errorMessage;
-
-  /// Whether the current state is [ViewStatus.initial].
-  bool get isInitial => status == ViewStatus.initial;
-
-  /// Whether the current state is [ViewStatus.loading].
-  bool get isLoading => status == ViewStatus.loading;
-
-  /// Whether the current state is [ViewStatus.success].
-  bool get isSuccess => status == ViewStatus.success;
-
-  /// Whether the current state is [ViewStatus.error].
-  bool get isError => status == ViewStatus.error;
-
-  /// Whether data is available.
-  bool get hasData => data != null;
+  /// Whether current state is [error].
+  bool get isError => this == ViewState.error;
 }

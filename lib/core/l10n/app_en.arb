@@ -59,5 +59,26 @@
   "doubleZero": "Double zero",
   "@doubleZero": {
     "description": "Semantics label for keypad 00 button"
+  },
+  "startupErrorTitle": "Something went wrong",
+  "@startupErrorTitle": {
+    "description": "Title displayed when application bootstrap fails"
+  },
+  "startupErrorMessage": "We were unable to initialize your local database. Please try again or contact support if the issue persists.",
+  "@startupErrorMessage": {
+    "description": "Explanation message displayed when application bootstrap fails"
+  },
+  "actionTryAgain": "Try again",
+  "@actionTryAgain": {
+    "description": "Action button label to retry a failed operation"
+  },
+  "actionContactSupport": "Contact support",
+  "@actionContactSupport": {
+    "description": "Action button label to email customer support"
+  },
+  "loadingApp": "Loading Daily Safe-to-Spend...",
+  "@loadingApp": {
+    "description": "Accessibility label for loading splash screen"
   }
 }
+

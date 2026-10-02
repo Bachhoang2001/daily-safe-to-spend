@@ -31,8 +31,24 @@ class DeepLinkService extends GetxService implements IDeepLinkService {
       StreamController<QuickAddTriggerEvent>.broadcast();
 
   StreamSubscription<Uri>? _uriSubscription;
+  Uri? _pendingDeepLink;
   Uri? _lastHandledUri;
   DateTime? _lastHandledTime;
+
+  @override
+  Uri? get pendingDeepLink => _pendingDeepLink;
+
+  @override
+  Uri? consumePendingDeepLink() {
+    final uri = _pendingDeepLink;
+    _pendingDeepLink = null;
+    return uri;
+  }
+
+  @override
+  void setPendingDeepLink(Uri? uri) {
+    _pendingDeepLink = uri;
+  }
 
   bool _isDuplicate(Uri uri) {
     final now = DateTime.now();
@@ -72,6 +88,7 @@ class DeepLinkService extends GetxService implements IDeepLinkService {
     try {
       final initialUri = await _appLinks.getInitialLink();
       if (initialUri != null) {
+        _pendingDeepLink = initialUri;
         handleUri(initialUri);
       }
     } on Object catch (e, st) {

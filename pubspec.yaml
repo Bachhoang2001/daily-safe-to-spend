@@ -24,11 +24,13 @@ dependencies:
   rxdart: ^0.28.0
   sqlite3_flutter_libs: ^0.5.28
   timezone: ^0.10.0
+  url_launcher: ^6.3.1
   uuid: ^4.5.1
 
 dev_dependencies:
   build_runner: ^2.4.14
   drift_dev: ^2.24.0
+  flutter_native_splash: ^2.4.4
   flutter_test:
     sdk: flutter
   mocktail: ^1.0.4
@@ -37,3 +39,11 @@ dev_dependencies:
 flutter:
   generate: true
   uses-material-design: true
+
+flutter_native_splash:
+  color: "#2E9E6A"
+  color_dark: "#111413"
+  android_12:
+    color: "#2E9E6A"
+    color_dark: "#111413"
+

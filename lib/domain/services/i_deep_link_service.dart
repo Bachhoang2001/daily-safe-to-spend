@@ -20,6 +20,15 @@ abstract class IDeepLinkService {
   /// Initializes deep link listeners.
   Future<void> init();
 
+  /// The pending deep link waiting to be consumed (e.g. from cold start).
+  Uri? get pendingDeepLink;
+
+  /// Consumes and clears the pending deep link, returning it exactly once.
+  Uri? consumePendingDeepLink();
+
+  /// Sets or clears the pending deep link.
+  void setPendingDeepLink(Uri? uri);
+
   /// Manually evaluates and dispatches an incoming deep link [uri].
   void handleUri(Uri uri);
 

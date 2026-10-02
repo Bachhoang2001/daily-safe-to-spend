@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:safe_to_spend/core/ids/device_id_provider.dart';
 import 'package:safe_to_spend/core/ids/uuid_generator.dart';
+import 'package:safe_to_spend/core/startup/startup_task.dart';
 import 'package:safe_to_spend/core/time/clock.dart';
 import 'package:safe_to_spend/data/db/app_database.dart';
 import 'package:safe_to_spend/data/repositories/bill_repository.dart';
@@ -13,6 +14,7 @@ import 'package:safe_to_spend/data/repositories/settings_repository.dart';
 import 'package:safe_to_spend/data/services/budget_snapshot_service.dart';
 import 'package:safe_to_spend/data/services/deep_link_service.dart';
 import 'package:safe_to_spend/data/services/noop_analytics_service.dart';
+
 import 'package:safe_to_spend/domain/repositories/i_bill_repository.dart';
 import 'package:safe_to_spend/domain/repositories/i_category_repository.dart';
 import 'package:safe_to_spend/domain/repositories/i_expense_repository.dart';
@@ -101,7 +103,7 @@ class InitialBinding extends Bindings {
         ),
         permanent: true,
       )
-      ..put<IAnalyticsService>(NoOpAnalyticsService(), permanent: true)
+      ..put<IAnalyticsService>(const NoOpAnalyticsService(), permanent: true)
       ..put<IDeepLinkService>(
         DeepLinkService(profileRepo: Get.find(), analytics: Get.find()),
         permanent: true,
@@ -115,6 +117,10 @@ class InitialBinding extends Bindings {
           goalRepo: Get.find(),
           clock: Get.find(),
         ),
+        permanent: true,
+      )
+      ..put<IStartupTaskRunner>(
+        StartupTaskRunner(analytics: Get.find()),
         permanent: true,
       );
   }

@@ -1,5 +1,5 @@
 # Session State
-_Cập nhật: 2026-10-02 · Spec vừa xong: 005 · Spec tiếp theo: 006_
+_Cập nhật: 2026-10-02 · Spec vừa xong: 006 · Spec tiếp theo: 007_
 
 ## Tiến độ
 | Spec | Feature | Trạng thái | Tests (pass/total) | Analyze (warnings) | Ngày |
@@ -9,7 +9,7 @@ _Cập nhật: 2026-10-02 · Spec vừa xong: 005 · Spec tiếp theo: 006_
 | 003 | Budget engine | DONE | 74/74 (engine) / 80/80 (total) | 0 | 2026-10-02 |
 | 004 | Data layer | DONE | 29/29 (flutter) / 75/75 (engine) / 104/104 (total) | 0 | 2026-10-02 |
 | 005 | App shell | DONE | 70/70 (flutter) / 75/75 (engine) / 145/145 (total) | 0 | 2026-10-02 |
-| 006 | Splash & bootstrap | TODO | – | – | – |
+| 006 | Splash & bootstrap | DONE | 82/82 (flutter) / 75/75 (engine) / 157/157 (total) | 0 | 2026-10-02 |
 | 007 | Onboarding welcome | TODO | – | – | – |
 | 008 | Onboarding income | TODO | – | – | – |
 | 009 | Onboarding bills | TODO | – | – | – |
@@ -240,13 +240,49 @@ Trạng thái: TODO · IN_PROGRESS (<bước>) · BLOCKED (<lý do>) · DONE
   - **Thiết kế Deep Link (`safetospend://quick-add`):**
     - Đã đăng ký scheme `safetospend` với host `quick-add` trong `ios/Runner/Info.plist` và `android/app/src/main/AndroidManifest.xml`.
     - `DeepLinkService` được inject permanent trong `InitialBinding`, tự động kích hoạt lắng nghe trong `onInit()`, kiểm tra `hasCompletedOnboarding()` trước khi phát `QuickAddTriggerEvent`, có debounce 1.500ms chống trùng lặp sự kiện mở modal khi cold start hoặc runtime.
+- **Trình tự khởi động & Bootstrap (Spec 006):**
+  - **Trình tự thực thi 7 bước chuẩn:**
+    1. `WidgetsFlutterBinding.ensureInitialized()`: Khởi tạo binding hạ tầng Flutter.
+    2. Khởi tạo SQLite Database (`AppDatabase.defaults()`): Mở database file trên background isolate qua `NativeDatabase.createInBackground(file)` kết hợp `path_provider`, không chặn UI isolate.
+    3. `InitialBinding().dependencies()`: Đăng ký toàn bộ service và repository permanent trong GetX (`AppDatabase`, các repository nghiệp vụ, `Clock`, `UuidGenerator`, `IBudgetSnapshotService`, `IDeepLinkService`, `IAnalyticsService`, `IStartupTaskRunner`).
+    4. Lập lịch lazy startup tasks: `StartupTaskRunner.schedulePostFrame()` lắng nghe `WidgetsBinding.instance.addPostFrameCallback` để thực thi các task sau frame đầu tiên.
+    5. `runApp(const SafeToSpendApp())`: Khởi chạy ứng dụng với `initialRoute: AppRoutes.splash`.
+    6. `SplashController.onReady()` $\rightarrow$ gọi `bootstrap()`:
+       - Khởi động đồng hồ đo cold start benchmark.
+       - Seed 8 danh mục mặc định qua `categoryRepo.seedDefaultCategories()` (idempotent, bỏ qua nếu đã seed).
+       - Kiểm tra trạng thái hoàn tất onboarding qua `profileRepo.hasCompletedOnboarding()`.
+       - Ghi nhận sự kiện Analytics `app_open` với các tham số `is_first_open` và `has_profile`.
+       - Tiêu thụ deep link đang chờ qua `deepLinkService.consumePendingDeepLink()`:
+         - Nếu `hasCompletedOnboarding == true`: Điều hướng về `AppRoutes.today` (hoặc `AppRoutes.root`); nếu có pending deep link `safetospend://quick-add`, phát `QuickAddTriggerEvent` để mở modal Quick Add đúng 1 lần.
+         - Nếu `hasCompletedOnboarding == false`: Điều hướng về `AppRoutes.onboardingWelcome`; hủy bỏ pending deep link để không làm gián đoạn luồng onboarding ban đầu.
+    7. Màn hình lỗi khởi động: Nếu có ngoại lệ trong quá trình mở DB/seed/đọc profile, bắt lỗi sạch sẽ, chuyển state sang `ViewState.error`, hiển thị `StartupErrorPage` với nút "Try again" và "Contact support" (mailto, không kèm dữ liệu tài chính).
+- **Cơ chế thêm `IStartupTask` lazy:**
+  - Mục đích: Tránh nghẽn cold start, các SDK bên thứ 3 (RevenueCat Spec 022, AdMob Spec 026) được khởi tạo hoàn toàn sau khi frame đầu tiên của màn hình chính đã render.
+  - Cách thêm task mới:
+    1. Tạo class thực thi interface `IStartupTask` (`lib/core/startup/startup_task.dart`):
+       ```dart
+       class RevenueCatStartupTask implements IStartupTask {
+         @override
+         String get name => 'RevenueCat';
+
+         @override
+         Future<void> execute() async {
+           // Khởi tạo SDK RevenueCat Purchases
+         }
+       }
+       ```
+    2. Đăng ký task với `IStartupTaskRunner` (thường trong `InitialBinding` hoặc binding tương ứng):
+       ```dart
+       Get.find<IStartupTaskRunner>().registerTask(RevenueCatStartupTask());
+       ```
+    3. Cơ chế cách ly lỗi: `StartupTaskRunner` tự động bọc mỗi task trong khối try/catch độc lập, ghi log qua `FlutterError.reportError`. Nếu một task thất bại (ví dụ lỗi mạng), các task còn lại vẫn tiếp tục chạy và app không bao giờ bị crash.
 - **Quy ước Git:** Xong mỗi spec (tính năng), USER sẽ tự thực hiện `git commit` và `git push` code. Agent tuyệt đối không tự ý chạy git commit hoặc push.
 
 ## Known issues / Tech debt
-- Không có issue hoặc tech debt phát sinh từ Spec 005. Đạt 100% test pass (145/145 tests: 70 flutter + 75 engine), 0 analyze issue (zero-warning), 0 vi phạm double, 100% DoD đạt.
-- 4 lỗi tiềm ẩn cấp hệ thống đã được phát hiện và xử lý triệt để: thiếu OS scheme trong Info.plist & AndroidManifest.xml, GetX null check crash trên Android intent, thiếu tự động gọi `init()` trong `DeepLinkService`, và Timer leak guard trong `AmountKeypad`.
-- Các tính năng mở rộng ngoài MVP (như Universal Links cho web, `dueOnWeekendShift`, multi-goals, irregular rollover, FTS5 cho note chi tiêu, Cloud sync 2 chiều) đã được ghi nhận trong `docs/BACKLOG.md`.
+- Không có issue hoặc tech debt phát sinh từ Spec 006. Đạt 100% test pass (157/157 tests: 82 flutter + 75 engine), 0 analyze issue (zero-warning), 0 vi phạm double, thời gian cold start thực tế **284ms** (vượt xa chỉ tiêu $\le 1.0\text{s}$), 100% DoD đạt.
+- 4 vấn đề kỹ thuật phát hiện trong quá trình phát triển Spec 006 đã được xử lý triệt để: loại bỏ lồng lặp thẻ Semantics trên nút bấm `StartupErrorPage`, bổ sung type argument `<dynamic>` và `unawaited` trên các lệnh chuyển route GetX, chuẩn hóa `ViewState` thành enum có đầy đủ helper getters, và bảo đảm an toàn dữ liệu tài chính khi báo lỗi qua email hỗ trợ (chỉ gửi mã ngoại lệ kỹ thuật, tuyệt đối không gửi số dư/chi tiêu).
+- Các ý tưởng ngoài phạm vi MVP (Telemetry đo độ trễ cho startup tasks, dynamic splash animation) đã được cập nhật vào `docs/BACKLOG.md`.
 
 ## Next
-- Spec 006 · Splash & bootstrap (file `specs/006-splash-bootstrap.md`).
+- Spec 007 · Onboarding 1: Welcome (file `specs/007-onboarding-welcome.md`).
 

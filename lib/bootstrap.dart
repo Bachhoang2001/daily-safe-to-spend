@@ -1,37 +1,31 @@
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:safe_to_spend/app.dart';
-import 'package:safe_to_spend/core/ids/device_id_provider.dart';
-import 'package:safe_to_spend/core/ids/uuid_generator.dart';
-import 'package:safe_to_spend/core/time/clock.dart';
+import 'package:safe_to_spend/core/bindings/initial_binding.dart';
+import 'package:safe_to_spend/core/startup/startup_task.dart';
 import 'package:safe_to_spend/data/db/app_database.dart';
-import 'package:safe_to_spend/data/repositories/category_repository.dart';
-import 'package:safe_to_spend/data/repositories/settings_repository.dart';
 
-/// Initializes core services and starts the application.
+/// Initializes core platform services and starts the application.
 Future<void> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // 1. Initialize local SQLite database
   final db = Get.isRegistered<AppDatabase>()
       ? Get.find<AppDatabase>()
       : AppDatabase.defaults();
   Get.put<AppDatabase>(db, permanent: true);
 
-  const clock = SystemClock();
-  const uuid = DefaultUuidGenerator();
-  final settingsRepo = SettingsRepository(db: db, clock: clock);
-  final deviceIdProvider = DeviceIdProvider(
-    settingsRepo: settingsRepo,
-    uuid: uuid,
-  );
+  // 2. Initialize application-wide dependencies
+  InitialBinding().dependencies();
 
-  final categoryRepo = CategoryRepository(
-    db: db,
-    clock: clock,
-    uuid: uuid,
-    deviceIdProvider: deviceIdProvider,
-  );
-  await categoryRepo.seedDefaultCategories();
+  // 3. Register post-frame hook for lazy background startup tasks
+  if (Get.isRegistered<IStartupTaskRunner>()) {
+    final runner = Get.find<IStartupTaskRunner>();
+    if (runner is StartupTaskRunner) {
+      runner.schedulePostFrame();
+    }
+  }
 
+  // 4. Run Flutter application
   runApp(const SafeToSpendApp());
 }
