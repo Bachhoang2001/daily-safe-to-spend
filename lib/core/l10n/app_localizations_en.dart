@@ -68,4 +68,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loadingApp => 'Loading Daily Safe-to-Spend...';
+
+  @override
+  String get onboardingWelcomeTitle => 'Know what\'s safe to spend today.';
+
+  @override
+  String get onboardingWelcomeSubtitle =>
+      'One number every morning. No bank login. Your data stays on your phone.';
+
+  @override
+  String get onboardingSampleSafeToday => 'safe to spend today';
+
+  @override
+  String get onboardingFeaturePaycheck => 'Built around your paycheck';
+
+  @override
+  String get onboardingFeatureIrregular => 'Works with irregular income';
+
+  @override
+  String get onboardingFeaturePrivate => 'Private by design';
+
+  @override
+  String get onboardingGetStarted => 'Get started';
+
+  @override
+  String get onboardingPrivacyPolicy => 'Privacy Policy';
+
+  @override
+  String get onboardingTerms => 'Terms of Service';
+
+  @override
+  String onboardingStepProgress(int current, int total) {
+    return 'Step $current of $total';
+  }
 }

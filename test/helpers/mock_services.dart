@@ -2,6 +2,7 @@ import 'package:app_links/app_links.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:safe_to_spend/domain/repositories/i_category_repository.dart';
 import 'package:safe_to_spend/domain/repositories/i_profile_repository.dart';
+import 'package:safe_to_spend/domain/repositories/i_settings_repository.dart';
 import 'package:safe_to_spend/domain/services/i_analytics_service.dart';
 import 'package:safe_to_spend/domain/services/i_deep_link_service.dart';
 
@@ -19,3 +20,6 @@ class MockDeepLinkService extends Mock implements IDeepLinkService {}
 
 /// Mock implementation of [ICategoryRepository] for testing.
 class MockCategoryRepository extends Mock implements ICategoryRepository {}
+
+/// Mock implementation of [ISettingsRepository] for testing.
+class MockSettingsRepository extends Mock implements ISettingsRepository {}

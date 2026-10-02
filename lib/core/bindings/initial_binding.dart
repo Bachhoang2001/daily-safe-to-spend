@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:safe_to_spend/core/ids/device_id_provider.dart';
 import 'package:safe_to_spend/core/ids/uuid_generator.dart';
+import 'package:safe_to_spend/core/navigation/navigator.dart';
 import 'package:safe_to_spend/core/startup/startup_task.dart';
 import 'package:safe_to_spend/core/time/clock.dart';
 import 'package:safe_to_spend/data/db/app_database.dart';
@@ -122,6 +123,7 @@ class InitialBinding extends Bindings {
       ..put<IStartupTaskRunner>(
         StartupTaskRunner(analytics: Get.find()),
         permanent: true,
-      );
+      )
+      ..put<INavigator>(const AppNavigator(), permanent: true);
   }
 }

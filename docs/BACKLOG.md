@@ -15,4 +15,6 @@ Các ý tưởng, cải tiến và technical debt ghi nhận trong quá trình p
 - [ ] App Shell & Deep Link - Hỗ trợ Universal Links (iOS) và Android App Links thông qua file cấu hình web `apple-app-site-association` và `assetlinks.json` trên domain landing page khi triển khai web marketing sau MVP (hiện tại MVP sử dụng Custom URL scheme `safetospend://quick-add` cho Widget và Native shortcuts).
 - [ ] Startup & Bootstrap - Bổ sung Telemetry ghi nhận độ trễ thực thi (execution latency) của từng `IStartupTask` chạy lazy sau frame đầu để phát hiện các third-party SDK gây nghẽn CPU background sau này.
 - [ ] Startup & Splash - Nghiên cứu Dynamic Splash Animation (Lottie / Rive) sau MVP nếu nhận diện thương hiệu yêu cầu hiệu ứng chuyển động logo phức tạp thay cho static vector native splash.
+- [ ] Onboarding Welcome - Hỗ trợ video demo siêu ngắn hoặc interactive preview card cho phép người dùng nhập thử một số chi tiêu giả định ngay trên Welcome trước khi bắt đầu.
+- [ ] Onboarding Legal - Tích hợp In-App Webview (SFSafariViewController / Custom Tabs) khi xem Privacy Policy & Terms để giữ người dùng không bị rời app trong luồng đăng ký ban đầu.
 

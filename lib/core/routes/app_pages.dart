@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:safe_to_spend/core/routes/app_routes.dart';
 import 'package:safe_to_spend/core/routes/middlewares/onboarding_middleware.dart';
+import 'package:safe_to_spend/features/onboarding/bindings/onboarding_binding.dart';
+import 'package:safe_to_spend/features/onboarding/pages/welcome_page.dart';
 import 'package:safe_to_spend/features/root/bindings/root_shell_binding.dart';
 import 'package:safe_to_spend/features/root/pages/root_shell_page.dart';
 import 'package:safe_to_spend/features/splash/bindings/splash_binding.dart';
@@ -32,19 +34,23 @@ abstract class AppPages {
 
     GetPage<dynamic>(
       name: AppRoutes.onboardingWelcome,
-      page: () => const _PlaceholderScreen(title: 'Welcome'),
+      page: () => const WelcomePage(),
+      binding: OnboardingBinding(),
     ),
     GetPage<dynamic>(
       name: AppRoutes.onboardingIncome,
       page: () => const _PlaceholderScreen(title: 'Onboarding Income'),
+      binding: OnboardingBinding(),
     ),
     GetPage<dynamic>(
       name: AppRoutes.onboardingBills,
       page: () => const _PlaceholderScreen(title: 'Onboarding Bills'),
+      binding: OnboardingBinding(),
     ),
     GetPage<dynamic>(
       name: AppRoutes.onboardingResult,
       page: () => const _PlaceholderScreen(title: 'Onboarding Result'),
+      binding: OnboardingBinding(),
     ),
     GetPage<dynamic>(
       name: AppRoutes.root,

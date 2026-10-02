@@ -1,5 +1,5 @@
 # Session State
-_Cập nhật: 2026-10-02 · Spec vừa xong: 006 · Spec tiếp theo: 007_
+_Cập nhật: 2026-10-02 · Spec vừa xong: 007 · Spec tiếp theo: 008_
 
 ## Tiến độ
 | Spec | Feature | Trạng thái | Tests (pass/total) | Analyze (warnings) | Ngày |
@@ -10,7 +10,7 @@ _Cập nhật: 2026-10-02 · Spec vừa xong: 006 · Spec tiếp theo: 007_
 | 004 | Data layer | DONE | 29/29 (flutter) / 75/75 (engine) / 104/104 (total) | 0 | 2026-10-02 |
 | 005 | App shell | DONE | 70/70 (flutter) / 75/75 (engine) / 145/145 (total) | 0 | 2026-10-02 |
 | 006 | Splash & bootstrap | DONE | 82/82 (flutter) / 75/75 (engine) / 157/157 (total) | 0 | 2026-10-02 |
-| 007 | Onboarding welcome | TODO | – | – | – |
+| 007 | Onboarding welcome | DONE | 98/98 (flutter) / 75/75 (engine) / 173/173 (total) | 0 | 2026-10-02 |
 | 008 | Onboarding income | TODO | – | – | – |
 | 009 | Onboarding bills | TODO | – | – | – |
 | 010 | Onboarding result | TODO | – | – | – |
@@ -276,13 +276,25 @@ Trạng thái: TODO · IN_PROGRESS (<bước>) · BLOCKED (<lý do>) · DONE
        Get.find<IStartupTaskRunner>().registerTask(RevenueCatStartupTask());
        ```
     3. Cơ chế cách ly lỗi: `StartupTaskRunner` tự động bọc mỗi task trong khối try/catch độc lập, ghi log qua `FlutterError.reportError`. Nếu một task thất bại (ví dụ lỗi mạng), các task còn lại vẫn tiếp tục chạy và app không bao giờ bị crash.
+- **`OnboardingController` dùng chung cho 4 màn onboarding (Spec 007–010):**
+  - Quản lý trạng thái nhập liệu xuyên suốt wizard (Welcome $\rightarrow$ Income $\rightarrow$ Bills $\rightarrow$ Result) bằng model bất biến `OnboardingDraft` (`currentStep.obs`, `draft.obs`, `state.obs`, `errorMessage`).
+  - Dữ liệu chỉ nằm trên RAM tạm thời trong suốt quá trình đi qua các bước; chỉ khi người dùng xác nhận ở màn 4 (`OnboardingResult` - Spec 010), toàn bộ thông tin mới được ghi vào SQLite DB và set `onboarding_completed = true`.
+  - Vòng đời: `OnboardingBinding` gán vào cả 4 route onboarding trong `AppPages`. Khi người dùng kết thúc onboarding và chuyển sang `/today` qua `offAllNamed`, GetX tự động dispose và giải phóng `OnboardingController` khỏi RAM.
+- **Trừu tượng hóa điều hướng với `INavigator` (`lib/core/navigation/navigator.dart`):**
+  - Đóng gói các method điều hướng GetX (`toNamed`, `offNamed`, `offAllNamed`, `back`) vào interface `INavigator`.
+  - Cho phép inject qua constructor vào Controller, hỗ trợ mock 100% bằng pure `mocktail` trong unit test mà không phụ thuộc vào global static state của GetX hay Flutter element tree.
+  - Hiện thực mặc định `AppNavigator` được đăng ký permanent trong `InitialBinding`.
 - **Quy ước Git:** Xong mỗi spec (tính năng), USER sẽ tự thực hiện `git commit` và `git push` code. Agent tuyệt đối không tự ý chạy git commit hoặc push.
 
 ## Known issues / Tech debt
-- Không có issue hoặc tech debt phát sinh từ Spec 006. Đạt 100% test pass (157/157 tests: 82 flutter + 75 engine), 0 analyze issue (zero-warning), 0 vi phạm double, thời gian cold start thực tế **284ms** (vượt xa chỉ tiêu $\le 1.0\text{s}$), 100% DoD đạt.
-- 4 vấn đề kỹ thuật phát hiện trong quá trình phát triển Spec 006 đã được xử lý triệt để: loại bỏ lồng lặp thẻ Semantics trên nút bấm `StartupErrorPage`, bổ sung type argument `<dynamic>` và `unawaited` trên các lệnh chuyển route GetX, chuẩn hóa `ViewState` thành enum có đầy đủ helper getters, và bảo đảm an toàn dữ liệu tài chính khi báo lỗi qua email hỗ trợ (chỉ gửi mã ngoại lệ kỹ thuật, tuyệt đối không gửi số dư/chi tiêu).
-- Các ý tưởng ngoài phạm vi MVP (Telemetry đo độ trễ cho startup tasks, dynamic splash animation) đã được cập nhật vào `docs/BACKLOG.md`.
+- Không có issue hoặc tech debt phát sinh từ Spec 007. Đạt 100% test pass (173/173 tests: 98 flutter + 75 engine), 0 analyze issue (zero-warning), 0 vi phạm double, 100% DoD đạt.
+- 4 điểm cải tiến kỹ thuật trong Spec 007 đã được hoàn thành:
+  1. Responsive Dynamic Type 2.0x: dùng `Wrap` cho hàng liên kết pháp lý và `Expanded` cho label card thay vì `Row` cứng, chống RenderFlex overflow.
+  2. Không nuốt lỗi: `_launchUrlString` chuyển trạng thái sang `ViewState.error`, lưu `errorMessage` và gọi `recordError(e, st)`.
+  3. Linter clean: sửa `prefer_int_literals` trong golden test (`textScale: 2`).
+  4. Accessibility: gắn nhãn `Semantics` tĩnh cho thẻ số tiền `$42 safe to spend today`, bọc icon trang trí bằng `ExcludeSemantics`.
+- Các ý tưởng ngoài phạm vi MVP (interactive preview card, in-app webview legal links) đã được cập nhật vào `docs/BACKLOG.md`.
 
 ## Next
-- Spec 007 · Onboarding 1: Welcome (file `specs/007-onboarding-welcome.md`).
+- Spec 008 · Onboarding 2: Income & pay schedule (file `specs/008-onboarding-income.md`).
 

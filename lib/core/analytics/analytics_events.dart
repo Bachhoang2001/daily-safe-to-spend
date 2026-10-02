@@ -11,6 +11,12 @@ abstract class AnalyticsEvents {
   /// Event emitted when a quick-add deep link is triggered.
   static const String deepLinkQuickAdd = 'deep_link_quick_add';
 
+  /// Event emitted when the user begins the onboarding wizard.
+  static const String onboardingStart = 'onboarding_start';
+
+  /// Event emitted when the user finishes onboarding setup.
+  static const String onboardingComplete = 'onboarding_complete';
+
   // Parameter keys
   /// Whether this is the first time the app is launched.
   static const String isFirstOpen = 'is_first_open';

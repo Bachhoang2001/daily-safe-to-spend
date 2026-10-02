@@ -79,6 +79,56 @@
   "loadingApp": "Loading Daily Safe-to-Spend...",
   "@loadingApp": {
     "description": "Accessibility label for loading splash screen"
+  },
+  "onboardingWelcomeTitle": "Know what's safe to spend today.",
+  "@onboardingWelcomeTitle": {
+    "description": "Headline on the onboarding welcome screen"
+  },
+  "onboardingWelcomeSubtitle": "One number every morning. No bank login. Your data stays on your phone.",
+  "@onboardingWelcomeSubtitle": {
+    "description": "Subheading explaining local-first and zero-bank-connection value"
+  },
+  "onboardingSampleSafeToday": "safe to spend today",
+  "@onboardingSampleSafeToday": {
+    "description": "Label on sample Safe-to-Spend card"
+  },
+  "onboardingFeaturePaycheck": "Built around your paycheck",
+  "@onboardingFeaturePaycheck": {
+    "description": "Highlight feature bullet 1"
+  },
+  "onboardingFeatureIrregular": "Works with irregular income",
+  "@onboardingFeatureIrregular": {
+    "description": "Highlight feature bullet 2"
+  },
+  "onboardingFeaturePrivate": "Private by design",
+  "@onboardingFeaturePrivate": {
+    "description": "Highlight feature bullet 3"
+  },
+  "onboardingGetStarted": "Get started",
+  "@onboardingGetStarted": {
+    "description": "Primary call to action on welcome screen"
+  },
+  "onboardingPrivacyPolicy": "Privacy Policy",
+  "@onboardingPrivacyPolicy": {
+    "description": "Link text for Privacy Policy"
+  },
+  "onboardingTerms": "Terms of Service",
+  "@onboardingTerms": {
+    "description": "Link text for Terms of Service"
+  },
+  "onboardingStepProgress": "Step {current} of {total}",
+  "@onboardingStepProgress": {
+    "description": "Indicator of active onboarding step",
+    "placeholders": {
+      "current": {
+        "type": "int",
+        "example": "1"
+      },
+      "total": {
+        "type": "int",
+        "example": "4"
+      }
+    }
   }
 }
 

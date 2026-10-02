@@ -213,6 +213,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Loading Daily Safe-to-Spend...'**
   String get loadingApp;
+
+  /// Headline on the onboarding welcome screen
+  ///
+  /// In en, this message translates to:
+  /// **'Know what\'s safe to spend today.'**
+  String get onboardingWelcomeTitle;
+
+  /// Subheading explaining local-first and zero-bank-connection value
+  ///
+  /// In en, this message translates to:
+  /// **'One number every morning. No bank login. Your data stays on your phone.'**
+  String get onboardingWelcomeSubtitle;
+
+  /// Label on sample Safe-to-Spend card
+  ///
+  /// In en, this message translates to:
+  /// **'safe to spend today'**
+  String get onboardingSampleSafeToday;
+
+  /// Highlight feature bullet 1
+  ///
+  /// In en, this message translates to:
+  /// **'Built around your paycheck'**
+  String get onboardingFeaturePaycheck;
+
+  /// Highlight feature bullet 2
+  ///
+  /// In en, this message translates to:
+  /// **'Works with irregular income'**
+  String get onboardingFeatureIrregular;
+
+  /// Highlight feature bullet 3
+  ///
+  /// In en, this message translates to:
+  /// **'Private by design'**
+  String get onboardingFeaturePrivate;
+
+  /// Primary call to action on welcome screen
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get onboardingGetStarted;
+
+  /// Link text for Privacy Policy
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get onboardingPrivacyPolicy;
+
+  /// Link text for Terms of Service
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
+  String get onboardingTerms;
+
+  /// Indicator of active onboarding step
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}'**
+  String onboardingStepProgress(int current, int total);
 }
 
 class _AppLocalizationsDelegate
