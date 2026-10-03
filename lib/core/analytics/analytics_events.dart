@@ -14,6 +14,23 @@ abstract class AnalyticsEvents {
   /// Event emitted when the user begins the onboarding wizard.
   static const String onboardingStart = 'onboarding_start';
 
+  /// Event emitted when an onboarding step is completed.
+  static const String onboardingStepCompleted = 'onboarding_step_completed';
+
+  /// Event emitted when income mode is selected.
+  static const String onboardingIncomeModeSelected =
+      'onboarding_income_mode_selected';
+
+  /// Event emitted when pay frequency is selected.
+  static const String onboardingPayFrequencySelected =
+      'onboarding_pay_frequency_selected';
+
+  /// Event emitted when bills are added during onboarding.
+  static const String onboardingBillsAdded = 'onboarding_bills_added';
+
+  /// Event emitted when the bills step is skipped during onboarding.
+  static const String onboardingBillsSkipped = 'onboarding_bills_skipped';
+
   /// Event emitted when the user finishes onboarding setup.
   static const String onboardingComplete = 'onboarding_complete';
 

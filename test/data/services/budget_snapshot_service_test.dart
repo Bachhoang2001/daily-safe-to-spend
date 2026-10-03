@@ -72,6 +72,7 @@ void main() {
       billRepo: billRepo,
       goalRepo: goalRepo,
       clock: clock,
+      debounceDuration: Duration.zero,
     );
   });
 

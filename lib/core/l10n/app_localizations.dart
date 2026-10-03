@@ -273,6 +273,276 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Step {current} of {total}'**
   String onboardingStepProgress(int current, int total);
+
+  /// Continue button label
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get actionContinue;
+
+  /// Income question headline
+  ///
+  /// In en, this message translates to:
+  /// **'How do you get paid?'**
+  String get onboardingIncomeHowPaidTitle;
+
+  /// Fixed income card title
+  ///
+  /// In en, this message translates to:
+  /// **'Same amount on a schedule'**
+  String get onboardingIncomeModeFixedTitle;
+
+  /// Fixed income card subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Salary, hourly with predictable shifts, or regular pensions'**
+  String get onboardingIncomeModeFixedSubtitle;
+
+  /// Irregular income card title
+  ///
+  /// In en, this message translates to:
+  /// **'My income varies'**
+  String get onboardingIncomeModeIrregularTitle;
+
+  /// Irregular income card subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Freelance, gig worker, tips, or unpredictable commissions'**
+  String get onboardingIncomeModeIrregularSubtitle;
+
+  /// Paycheck frequency question headline
+  ///
+  /// In en, this message translates to:
+  /// **'How often are you paid?'**
+  String get onboardingIncomeFrequencyTitle;
+
+  /// Weekly pay frequency label
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get frequencyWeekly;
+
+  /// Bi-weekly pay frequency label
+  ///
+  /// In en, this message translates to:
+  /// **'Every 2 weeks'**
+  String get frequencyBiweekly;
+
+  /// Semi-monthly pay frequency label
+  ///
+  /// In en, this message translates to:
+  /// **'Twice a month'**
+  String get frequencySemimonthly;
+
+  /// Monthly pay frequency label
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get frequencyMonthly;
+
+  /// Next payday question headline
+  ///
+  /// In en, this message translates to:
+  /// **'When is your next payday?'**
+  String get onboardingIncomeNextPaydayTitle;
+
+  /// Placeholder when no payday date has been chosen
+  ///
+  /// In en, this message translates to:
+  /// **'Select upcoming payday'**
+  String get onboardingIncomeSelectPaydayPlaceholder;
+
+  /// Income per paycheck question headline
+  ///
+  /// In en, this message translates to:
+  /// **'How much do you take home each paycheck?'**
+  String get onboardingIncomeTakeHomeTitle;
+
+  /// Net income display tile label
+  ///
+  /// In en, this message translates to:
+  /// **'Net income per paycheck'**
+  String get onboardingIncomeNetIncomeLabel;
+
+  /// Initial spending balance question headline
+  ///
+  /// In en, this message translates to:
+  /// **'How much do you have to spend until then?'**
+  String get onboardingIncomeSpendUntilTitle;
+
+  /// Initial spending balance display tile label
+  ///
+  /// In en, this message translates to:
+  /// **'Spending balance for initial period'**
+  String get onboardingIncomeInitialBalanceLabel;
+
+  /// Helper text showing suggested initial balance based on days left
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested: {amount} based on remaining days'**
+  String onboardingIncomeSuggestedBalance(String amount);
+
+  /// Current balance question headline for irregular income
+  ///
+  /// In en, this message translates to:
+  /// **'How much money do you have right now?'**
+  String get onboardingIncomeCurrentMoneyTitle;
+
+  /// Current balance display tile label
+  ///
+  /// In en, this message translates to:
+  /// **'Available spending money'**
+  String get onboardingIncomeAvailableSpendingMoneyLabel;
+
+  /// Safety horizon question headline for irregular income
+  ///
+  /// In en, this message translates to:
+  /// **'Plan ahead for how many days?'**
+  String get onboardingIncomePlanDaysTitle;
+
+  /// Days option label
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days'**
+  String daysCount(int count);
+
+  /// Badge indicator for recommended option
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get recommendedBadge;
+
+  /// Semantics label for currency picker dropdown
+  ///
+  /// In en, this message translates to:
+  /// **'Select currency, currently {currency}'**
+  String semanticsCurrencyPicker(String currency);
+
+  /// Semantics label for payday date picker button
+  ///
+  /// In en, this message translates to:
+  /// **'Select upcoming payday date, currently {date}'**
+  String semanticsSelectPayday(String date);
+
+  /// Headline on bills setup page for fixed income
+  ///
+  /// In en, this message translates to:
+  /// **'Any regular bills before your next payday?'**
+  String get onboardingBillsTitleFixed;
+
+  /// Headline on bills setup page for irregular income
+  ///
+  /// In en, this message translates to:
+  /// **'Any regular bills in the next {days} days?'**
+  String onboardingBillsTitleIrregular(int days);
+
+  /// Subheading explaining recurring bills protection
+  ///
+  /// In en, this message translates to:
+  /// **'Add upcoming recurring expenses to protect your daily limit.'**
+  String get onboardingBillsSubtitle;
+
+  /// Summary line showing total bill occurrences before next payday
+  ///
+  /// In en, this message translates to:
+  /// **'Bills before payday: {amount}'**
+  String onboardingBillsTotalBeforePayday(String amount);
+
+  /// Empty state prompt when no bills have been added
+  ///
+  /// In en, this message translates to:
+  /// **'No bills added yet. Tap a suggestion above or skip to continue.'**
+  String get onboardingBillsEmptyPrompt;
+
+  /// Skip button label on bills step
+  ///
+  /// In en, this message translates to:
+  /// **'Skip for now'**
+  String get onboardingBillsSkipForNow;
+
+  /// Button or title for adding a bill
+  ///
+  /// In en, this message translates to:
+  /// **'Add Bill'**
+  String get addBill;
+
+  /// Title for editing a bill
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Bill'**
+  String get editBill;
+
+  /// Label for bill name input
+  ///
+  /// In en, this message translates to:
+  /// **'Bill name'**
+  String get billNameLabel;
+
+  /// Label for bill amount input
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get billAmountLabel;
+
+  /// Button label for saving changes to an existing bill
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveChanges;
+
+  /// Label for bill first due date
+  ///
+  /// In en, this message translates to:
+  /// **'First due date'**
+  String get billDueDateLabel;
+
+  /// Label for bill recurrence selector
+  ///
+  /// In en, this message translates to:
+  /// **'Repeats'**
+  String get billRecurrenceLabel;
+
+  /// Weekly recurrence option
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get recurrenceWeekly;
+
+  /// Monthly recurrence option
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get recurrenceMonthly;
+
+  /// Yearly recurrence option
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get recurrenceYearly;
+
+  /// Validation message when bill name is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a bill name'**
+  String get validationBillNameRequired;
+
+  /// Validation message when bill name exceeds 40 characters
+  ///
+  /// In en, this message translates to:
+  /// **'Bill name cannot exceed 40 characters'**
+  String get validationBillNameTooLong;
+
+  /// Validation message when bill amount is zero or negative
+  ///
+  /// In en, this message translates to:
+  /// **'Amount must be greater than zero'**
+  String get validationBillAmountPositive;
+
+  /// Validation message when bill first due date is in the past
+  ///
+  /// In en, this message translates to:
+  /// **'First due date must be on or after today'**
+  String get validationBillDatePast;
 }
 
 class _AppLocalizationsDelegate

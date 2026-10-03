@@ -129,6 +129,222 @@
         "example": "4"
       }
     }
+  },
+  "actionContinue": "Continue",
+  "@actionContinue": {
+    "description": "Continue button label"
+  },
+  "onboardingIncomeHowPaidTitle": "How do you get paid?",
+  "@onboardingIncomeHowPaidTitle": {
+    "description": "Income question headline"
+  },
+  "onboardingIncomeModeFixedTitle": "Same amount on a schedule",
+  "@onboardingIncomeModeFixedTitle": {
+    "description": "Fixed income card title"
+  },
+  "onboardingIncomeModeFixedSubtitle": "Salary, hourly with predictable shifts, or regular pensions",
+  "@onboardingIncomeModeFixedSubtitle": {
+    "description": "Fixed income card subtitle"
+  },
+  "onboardingIncomeModeIrregularTitle": "My income varies",
+  "@onboardingIncomeModeIrregularTitle": {
+    "description": "Irregular income card title"
+  },
+  "onboardingIncomeModeIrregularSubtitle": "Freelance, gig worker, tips, or unpredictable commissions",
+  "@onboardingIncomeModeIrregularSubtitle": {
+    "description": "Irregular income card subtitle"
+  },
+  "onboardingIncomeFrequencyTitle": "How often are you paid?",
+  "@onboardingIncomeFrequencyTitle": {
+    "description": "Paycheck frequency question headline"
+  },
+  "frequencyWeekly": "Weekly",
+  "@frequencyWeekly": {
+    "description": "Weekly pay frequency label"
+  },
+  "frequencyBiweekly": "Every 2 weeks",
+  "@frequencyBiweekly": {
+    "description": "Bi-weekly pay frequency label"
+  },
+  "frequencySemimonthly": "Twice a month",
+  "@frequencySemimonthly": {
+    "description": "Semi-monthly pay frequency label"
+  },
+  "frequencyMonthly": "Monthly",
+  "@frequencyMonthly": {
+    "description": "Monthly pay frequency label"
+  },
+  "onboardingIncomeNextPaydayTitle": "When is your next payday?",
+  "@onboardingIncomeNextPaydayTitle": {
+    "description": "Next payday question headline"
+  },
+  "onboardingIncomeSelectPaydayPlaceholder": "Select upcoming payday",
+  "@onboardingIncomeSelectPaydayPlaceholder": {
+    "description": "Placeholder when no payday date has been chosen"
+  },
+  "onboardingIncomeTakeHomeTitle": "How much do you take home each paycheck?",
+  "@onboardingIncomeTakeHomeTitle": {
+    "description": "Income per paycheck question headline"
+  },
+  "onboardingIncomeNetIncomeLabel": "Net income per paycheck",
+  "@onboardingIncomeNetIncomeLabel": {
+    "description": "Net income display tile label"
+  },
+  "onboardingIncomeSpendUntilTitle": "How much do you have to spend until then?",
+  "@onboardingIncomeSpendUntilTitle": {
+    "description": "Initial spending balance question headline"
+  },
+  "onboardingIncomeInitialBalanceLabel": "Spending balance for initial period",
+  "@onboardingIncomeInitialBalanceLabel": {
+    "description": "Initial spending balance display tile label"
+  },
+  "onboardingIncomeSuggestedBalance": "Suggested: {amount} based on remaining days",
+  "@onboardingIncomeSuggestedBalance": {
+    "description": "Helper text showing suggested initial balance based on days left",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "$1,200.00"
+      }
+    }
+  },
+  "onboardingIncomeCurrentMoneyTitle": "How much money do you have right now?",
+  "@onboardingIncomeCurrentMoneyTitle": {
+    "description": "Current balance question headline for irregular income"
+  },
+  "onboardingIncomeAvailableSpendingMoneyLabel": "Available spending money",
+  "@onboardingIncomeAvailableSpendingMoneyLabel": {
+    "description": "Current balance display tile label"
+  },
+  "onboardingIncomePlanDaysTitle": "Plan ahead for how many days?",
+  "@onboardingIncomePlanDaysTitle": {
+    "description": "Safety horizon question headline for irregular income"
+  },
+  "daysCount": "{count} days",
+  "@daysCount": {
+    "description": "Days option label",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "14"
+      }
+    }
+  },
+  "recommendedBadge": "Recommended",
+  "@recommendedBadge": {
+    "description": "Badge indicator for recommended option"
+  },
+  "semanticsCurrencyPicker": "Select currency, currently {currency}",
+  "@semanticsCurrencyPicker": {
+    "description": "Semantics label for currency picker dropdown",
+    "placeholders": {
+      "currency": {
+        "type": "String",
+        "example": "USD"
+      }
+    }
+  },
+  "semanticsSelectPayday": "Select upcoming payday date, currently {date}",
+  "@semanticsSelectPayday": {
+    "description": "Semantics label for payday date picker button",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "2026-10-16"
+      }
+    }
+  },
+  "onboardingBillsTitleFixed": "Any regular bills before your next payday?",
+  "@onboardingBillsTitleFixed": {
+    "description": "Headline on bills setup page for fixed income"
+  },
+  "onboardingBillsTitleIrregular": "Any regular bills in the next {days} days?",
+  "@onboardingBillsTitleIrregular": {
+    "description": "Headline on bills setup page for irregular income",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "14"
+      }
+    }
+  },
+  "onboardingBillsSubtitle": "Add upcoming recurring expenses to protect your daily limit.",
+  "@onboardingBillsSubtitle": {
+    "description": "Subheading explaining recurring bills protection"
+  },
+  "onboardingBillsTotalBeforePayday": "Bills before payday: {amount}",
+  "@onboardingBillsTotalBeforePayday": {
+    "description": "Summary line showing total bill occurrences before next payday",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "$1,060"
+      }
+    }
+  },
+  "onboardingBillsEmptyPrompt": "No bills added yet. Tap a suggestion above or skip to continue.",
+  "@onboardingBillsEmptyPrompt": {
+    "description": "Empty state prompt when no bills have been added"
+  },
+  "onboardingBillsSkipForNow": "Skip for now",
+  "@onboardingBillsSkipForNow": {
+    "description": "Skip button label on bills step"
+  },
+  "addBill": "Add Bill",
+  "@addBill": {
+    "description": "Button or title for adding a bill"
+  },
+  "editBill": "Edit Bill",
+  "@editBill": {
+    "description": "Title for editing a bill"
+  },
+  "billNameLabel": "Bill name",
+  "@billNameLabel": {
+    "description": "Label for bill name input"
+  },
+  "billAmountLabel": "Amount",
+  "@billAmountLabel": {
+    "description": "Label for bill amount input"
+  },
+  "saveChanges": "Save Changes",
+  "@saveChanges": {
+    "description": "Button label for saving changes to an existing bill"
+  },
+  "billDueDateLabel": "First due date",
+  "@billDueDateLabel": {
+    "description": "Label for bill first due date"
+  },
+  "billRecurrenceLabel": "Repeats",
+  "@billRecurrenceLabel": {
+    "description": "Label for bill recurrence selector"
+  },
+  "recurrenceWeekly": "Weekly",
+  "@recurrenceWeekly": {
+    "description": "Weekly recurrence option"
+  },
+  "recurrenceMonthly": "Monthly",
+  "@recurrenceMonthly": {
+    "description": "Monthly recurrence option"
+  },
+  "recurrenceYearly": "Yearly",
+  "@recurrenceYearly": {
+    "description": "Yearly recurrence option"
+  },
+  "validationBillNameRequired": "Please enter a bill name",
+  "@validationBillNameRequired": {
+    "description": "Validation message when bill name is empty"
+  },
+  "validationBillNameTooLong": "Bill name cannot exceed 40 characters",
+  "@validationBillNameTooLong": {
+    "description": "Validation message when bill name exceeds 40 characters"
+  },
+  "validationBillAmountPositive": "Amount must be greater than zero",
+  "@validationBillAmountPositive": {
+    "description": "Validation message when bill amount is zero or negative"
+  },
+  "validationBillDatePast": "First due date must be on or after today",
+  "@validationBillDatePast": {
+    "description": "Validation message when bill first due date is in the past"
   }
 }
 

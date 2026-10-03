@@ -1,5 +1,5 @@
 # Session State
-_Cập nhật: 2026-10-02 · Spec vừa xong: 007 · Spec tiếp theo: 008_
+_Cập nhật: 2026-10-03 · Spec vừa xong: 009 · Spec tiếp theo: 010_
 
 ## Tiến độ
 | Spec | Feature | Trạng thái | Tests (pass/total) | Analyze (warnings) | Ngày |
@@ -11,8 +11,8 @@ _Cập nhật: 2026-10-02 · Spec vừa xong: 007 · Spec tiếp theo: 008_
 | 005 | App shell | DONE | 70/70 (flutter) / 75/75 (engine) / 145/145 (total) | 0 | 2026-10-02 |
 | 006 | Splash & bootstrap | DONE | 82/82 (flutter) / 75/75 (engine) / 157/157 (total) | 0 | 2026-10-02 |
 | 007 | Onboarding welcome | DONE | 98/98 (flutter) / 75/75 (engine) / 173/173 (total) | 0 | 2026-10-02 |
-| 008 | Onboarding income | TODO | – | – | – |
-| 009 | Onboarding bills | TODO | – | – | – |
+| 008 | Onboarding income | DONE | 140/140 (flutter) / 75/75 (engine) / 215/215 (total) | 0 | 2026-10-02 |
+| 009 | Onboarding bills | DONE | 161/161 (flutter) / 75/75 (engine) / 236/236 (total) | 0 | 2026-10-03 |
 | 010 | Onboarding result | TODO | – | – | – |
 | 011 | Today | TODO | – | – | – |
 | 012 | Quick add | TODO | – | – | – |
@@ -284,17 +284,49 @@ Trạng thái: TODO · IN_PROGRESS (<bước>) · BLOCKED (<lý do>) · DONE
   - Đóng gói các method điều hướng GetX (`toNamed`, `offNamed`, `offAllNamed`, `back`) vào interface `INavigator`.
   - Cho phép inject qua constructor vào Controller, hỗ trợ mock 100% bằng pure `mocktail` trong unit test mà không phụ thuộc vào global static state của GetX hay Flutter element tree.
   - Hiện thực mặc định `AppNavigator` được đăng ký permanent trong `InitialBinding`.
+- **Key lưu draft onboarding & Phục hồi an toàn (Spec 008):**
+  - Key định danh lưu trữ: `onboarding_draft` trong bảng `app_settings` thông qua `ISettingsRepository`.
+  - Lưu trữ tự động: Mỗi thay đổi hợp lệ trong wizard đều kích hoạt `saveDraft()`, tuần tự hóa `OnboardingDraft` sang JSON.
+  - Khôi phục an toàn (`loadDraft()`): Bắt mọi exception deserialization khi gặp chuỗi JSON hỏng, schema lỗi thời; tự động ghi log qua `analytics.recordError(..., reason: 'Failed to parse corrupted onboarding draft')` không chứa PII hoặc dữ liệu tài chính, xóa key hỏng và khôi phục an toàn về `const OnboardingDraft()`.
+  - Phân tích cú pháp bất thường (Defensive Parsing): `OnboardingDraft.fromJson` & `OnboardingBillDraft.fromJson` sử dụng các helper an toàn `parseCents`, `parseInt` và enum search `firstOrNull`, không ép kiểu thô `as num` để loại bỏ nguy cơ `TypeError` khi gặp chuỗi số, số âm hoặc dữ liệu dị biệt.
+  - Bất biến cách ly chế độ thu nhập (Mode Isolation): Khi đổi mode qua `selectIncomeMode`, controller tự động dọn sạch các trường không liên quan khỏi draft (`clearStartingBalance`, `clearSafetyHorizonDays` khi sang fixed; `clearPayFrequency`, `clearPayAnchorDate`, `clearNextPayday`, `clearIncomePerPaycheck`, `clearFirstPeriodBalance` khi sang irregular) để tránh rò rỉ dữ liệu giữa 2 mô hình.
+- **Cách suy ra `payAnchorDate` từ "Next Payday" (Spec 008):**
+  - Theo engine `packages/budget_engine/lib/src/period_resolver.dart`, ánh xạ `payAnchorDate` từ ngày nhận lương tiếp theo $P_{\text{next}}$:
+    - `PayFrequency.monthly`: Ngày lương neo vào ngày trong tháng (`day = P_{\text{next}}.\text{day}`). Gán `payAnchorDate = P_{\text{next}}`. Engine dùng `payAnchorDate.day` để xác định ngày lĩnh lương mỗi tháng (tự động kẹp ngày cuối tháng nếu tháng ít ngày hơn).
+    - `PayFrequency.weekly`: Chu kỳ 7 ngày. Gán `payAnchorDate = P_{\text{next}}`. Khoảng thời gian hiện tại bắt đầu từ $P_{\text{next}} - 7$ ngày và kết thúc vào $P_{\text{next}} - 1$ ngày.
+    - `PayFrequency.biweekly`: Chu kỳ 14 ngày. Gán `payAnchorDate = P_{\text{next}}`. Kỳ hiện tại bắt đầu từ $P_{\text{next}} - 14$ ngày và kết thúc vào $P_{\text{next}} - 1$ ngày.
+    - `PayFrequency.semimonthly`: Kỳ lương cố định ngày 1 và ngày 16 (`[1..15]` và `[16..cuối tháng]`). Gán `payAnchorDate = P_{\text{next}}`. Engine `resolvePeriod` phân nhánh trực tiếp theo `today.day <= 15`.
+- **Gợi ý số dư kỳ đầu (`suggestedFirstPeriodBalance`):**
+  - Công thức: $\text{cents} = (\text{incomeCents} \times \text{remainingDays} / \text{periodLength}).\text{round}()$.
+  - Kẹp an toàn trong $[1 \dots \text{incomeCents}]$.
+  - Nếu ngày nhận lương kế tiếp chính là hôm nay ($\text{remainingDays} = 0$), gợi ý hưởng trọn 1 kỳ lương $\text{incomeCents}$.
+- **`BillFormSheet` dùng chung (`lib/features/bills/widgets/bill_form_sheet.dart`) (Spec 009 & 015):**
+  - Component modal bottom sheet độc lập đặt tại `lib/features/bills/widgets/` sẵn sàng tái sử dụng 100% cho Spec 015 (Quản lý hóa đơn định kỳ).
+  - Hỗ trợ cả 2 chế độ: Thêm mới (`initialBill == null`) và Chỉnh sửa (`initialBill != null`), giữ nguyên ID cũ khi cập nhật.
+  - Tự động điền `suggestedName` nếu chạm từ chip gợi ý (Rent, Phone, Internet, Utilities, Car payment, Insurance, Subscriptions, Custom).
+  - Nhập số tiền qua `AmountKeypad` với validation cents $> 0$, hiển thị lỗi inline dưới thẻ tiền.
+  - Chọn ngày đến hạn đầu tiên qua `showDatePicker`, chặn ngày quá khứ (`firstDate: initialDate`) theo ADR-006.
+  - Chọn chu kỳ lặp (`Weekly`, `Monthly`, `Yearly`) qua `ChoiceChip` bọc trong `Wrap` (chống tràn ngang tại cỡ chữ Dynamic Type lớn).
+  - Static helper `BillFormSheet.show(context: ..., ...)` chuẩn GetX / Material bottom sheet.
+- **Getter `billsTotalBeforePayday` trong `OnboardingController` (Spec 009):**
+  - Sử dụng trực tiếp `generateBillOccurrences(engineBills, today, windowEnd)` từ `packages/budget_engine`.
+  - Fixed mode: Cửa sổ tính toán là $[today \dots nextPayday - 1]$ (chỉ tính các lần xuất hiện trước ngày nhận lương tiếp theo).
+  - Irregular mode: Cửa sổ tính toán là $[today \dots today + safetyHorizonDays - 1]$.
+  - Trả về `Money.zero(currency)` nếu không có hóa đơn hoặc $windowEnd < today$.
 - **Quy ước Git:** Xong mỗi spec (tính năng), USER sẽ tự thực hiện `git commit` và `git push` code. Agent tuyệt đối không tự ý chạy git commit hoặc push.
 
 ## Known issues / Tech debt
-- Không có issue hoặc tech debt phát sinh từ Spec 007. Đạt 100% test pass (173/173 tests: 98 flutter + 75 engine), 0 analyze issue (zero-warning), 0 vi phạm double, 100% DoD đạt.
-- 4 điểm cải tiến kỹ thuật trong Spec 007 đã được hoàn thành:
-  1. Responsive Dynamic Type 2.0x: dùng `Wrap` cho hàng liên kết pháp lý và `Expanded` cho label card thay vì `Row` cứng, chống RenderFlex overflow.
-  2. Không nuốt lỗi: `_launchUrlString` chuyển trạng thái sang `ViewState.error`, lưu `errorMessage` và gọi `recordError(e, st)`.
-  3. Linter clean: sửa `prefer_int_literals` trong golden test (`textScale: 2`).
-  4. Accessibility: gắn nhãn `Semantics` tĩnh cho thẻ số tiền `$42 safe to spend today`, bọc icon trang trí bằng `ExcludeSemantics`.
-- Các ý tưởng ngoài phạm vi MVP (interactive preview card, in-app webview legal links) đã được cập nhật vào `docs/BACKLOG.md`.
+- Không có issue hoặc tech debt phát sinh từ Spec 009. Đạt 100% test pass (236/236 tests: 161 flutter + 75 engine), 0 analyze issue (zero-warning), 0 vi phạm double, 100% DoD đạt.
+- 5 điểm cải tiến kỹ thuật trong Spec 009 đã được hoàn thành:
+  1. Responsive Dynamic Type 2.0x: Sửa lỗi RenderFlex overflow 150px tại thẻ dòng tổng trước ngày lương bằng cách chuyển `child: Row(...)` thành `child: Text(...)` trực tiếp trong `Container` có `width: double.infinity`.
+  2. Bọc `ChoiceChip` bằng `Wrap`: Đảm bảo các nút chọn chu kỳ lặp Weekly, Monthly, Yearly tự động xuống dòng an toàn trên màn hình hẹp khi người dùng phóng to font chữ.
+  3. Phân biệt nhãn nút `saveChanges`: Đổi nhãn nút submit của `BillFormSheet` sang `l10n.saveChanges` ("Save Changes") để phân biệt rõ với tiêu đề modal `l10n.addBill` ("Add Bill"), tối ưu cho accessibility và widget test.
+  4. Linter clean: Chuyển `textScale: 2.0` thành `textScale: 2` trong widget test để tuân thủ luật `prefer_int_literals`.
+  5. Loại bỏ Flaky race condition trong `budget_snapshot_service_test`: Khắc phục race condition của reactive debounce pipeline bằng cách cung cấp `debounceDuration: Duration.zero` trong test fixture.
+- Các ý tưởng ngoài phạm vi MVP (quét hóa đơn OCR, đồng bộ store subscriptions, hóa đơn biến thiên theo mùa) đã được cập nhật vào `docs/BACKLOG.md`.
 
 ## Next
-- Spec 008 · Onboarding 2: Income & pay schedule (file `specs/008-onboarding-income.md`).
+- Spec 010 · Onboarding 4: Result reveal & quyền thông báo (file `specs/010-onboarding-result.md`).
+
+
 

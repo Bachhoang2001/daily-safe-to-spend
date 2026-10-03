@@ -38,4 +38,15 @@
   3. Thu nhập được tách riêng thành bảng `income_entries` nhằm phục vụ mô hình thu nhập không đều (irregular mode).
 - Hệ quả: Loại bỏ nguy cơ xung đột từ khóa SQL với Drift/SQLite, code DAO/Repository sạch hơn, không cần backticks hay ngoặc vuông bảo vệ từ khóa SQL.
 
+## ADR-006: Onboarding Chỉ Cho Phép Chọn Ngày Đến Hạn Của Hóa Đơn Từ Hôm Nay Trở Đi
+- Ngày: 2026-10-03 · Spec: 009
+- Bối cảnh: Trong bước Onboarding 3 (Bills), người dùng khai báo các hóa đơn định kỳ sắp tới để hệ thống bảo lưu hạn mức chi tiêu. Người dùng có thể có hóa đơn định kỳ hàng tháng (ví dụ tiền nhà ngày 1 hàng tháng), và nếu hôm nay là ngày 3 thì hóa đơn của tháng này có thể đã được thanh toán hoặc chưa thanh toán. Nếu cho phép chọn ngày quá khứ (ví dụ ngày 1), phát sinh sự nhập nhằng: Hóa đơn tháng này đã trả chưa? Nếu đã trả thì có cần trừ vào kỳ lương hiện tại không?
+- Quyết định: Trong phạm vi Onboarding (MVP), chỉ cho phép chọn ngày đến hạn đầu tiên (`firstDueDate`) từ hôm nay trở đi (`firstDueDate >= today`). DatePicker chặn toàn bộ ngày trong quá khứ (`firstDate = today`).
+- Lý do:
+  1. Tránh hiểu lầm tài chính: Onboarding có nhiệm vụ tính toán số tiền "An toàn để chi tiêu hôm nay" (`safeToday`) cho khoảng thời gian còn lại đến kỳ lương tiếp theo. Nếu hóa đơn đã thanh toán trước khi dùng app, số tiền đó đã phản ánh vào số dư ban đầu (`firstPeriodBalance` hoặc `startingBalance`).
+  2. Đơn giản hóa trải nghiệm (DoD $\le 4$ chạm): Loại bỏ câu hỏi phụ phức tạp "Hóa đơn này tháng này đã trả chưa?".
+  3. Quản lý toàn diện ở Spec 015: Người dùng có thể điều chỉnh ngày gốc hoặc quản lý chi tiết trạng thái thanh toán trong màn Bills đầy đủ sau khi vào app.
+- Hệ quả: Loại bỏ khả năng phát sinh bug trừ trùng lặp hóa đơn đã thanh toán trước ngày onboard, bảo đảm con số `billsTotalBeforePayday` luôn đại diện chính xác cho các khoản nợ sắp phải chi trong kỳ hiện tại.
+
+
 

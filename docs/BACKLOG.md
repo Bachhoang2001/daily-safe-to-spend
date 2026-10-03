@@ -17,4 +17,9 @@ Các ý tưởng, cải tiến và technical debt ghi nhận trong quá trình p
 - [ ] Startup & Splash - Nghiên cứu Dynamic Splash Animation (Lottie / Rive) sau MVP nếu nhận diện thương hiệu yêu cầu hiệu ứng chuyển động logo phức tạp thay cho static vector native splash.
 - [ ] Onboarding Welcome - Hỗ trợ video demo siêu ngắn hoặc interactive preview card cho phép người dùng nhập thử một số chi tiêu giả định ngay trên Welcome trước khi bắt đầu.
 - [ ] Onboarding Legal - Tích hợp In-App Webview (SFSafariViewController / Custom Tabs) khi xem Privacy Policy & Terms để giữ người dùng không bị rời app trong luồng đăng ký ban đầu.
+- [ ] Onboarding Income - Tự động phát hiện ngày nhận lương tiếp theo thông qua tích hợp lịch hệ thống (Calendar integration) hoặc gợi ý thông minh dựa trên chu kỳ phổ biến.
+- [ ] Onboarding Income - Bổ sung máy tính thuế thu nhập ròng ước tính (Net Pay / Take-Home Calculator) hỗ trợ người dùng không nhớ rõ lương thực nhận sau khấu trừ.
+- [ ] Onboarding Bills - Quét và nhận diện hóa đơn tự động qua OCR camera hoặc nhập trực tiếp từ ảnh chụp biên lai / file PDF hóa đơn.
+- [ ] Onboarding Bills - Tự động đồng bộ các gói thuê bao định kỳ từ Apple App Store / Google Play Subscriptions hoặc phân tích hóa đơn email receipts.
+- [ ] Onboarding Bills - Hỗ trợ hóa đơn có số tiền biến thiên theo mùa (tiền điện, tiền nước) thay vì chỉ một con số cố định mỗi chu kỳ.
 

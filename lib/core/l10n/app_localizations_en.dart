@@ -101,4 +101,164 @@ class AppLocalizationsEn extends AppLocalizations {
   String onboardingStepProgress(int current, int total) {
     return 'Step $current of $total';
   }
+
+  @override
+  String get actionContinue => 'Continue';
+
+  @override
+  String get onboardingIncomeHowPaidTitle => 'How do you get paid?';
+
+  @override
+  String get onboardingIncomeModeFixedTitle => 'Same amount on a schedule';
+
+  @override
+  String get onboardingIncomeModeFixedSubtitle =>
+      'Salary, hourly with predictable shifts, or regular pensions';
+
+  @override
+  String get onboardingIncomeModeIrregularTitle => 'My income varies';
+
+  @override
+  String get onboardingIncomeModeIrregularSubtitle =>
+      'Freelance, gig worker, tips, or unpredictable commissions';
+
+  @override
+  String get onboardingIncomeFrequencyTitle => 'How often are you paid?';
+
+  @override
+  String get frequencyWeekly => 'Weekly';
+
+  @override
+  String get frequencyBiweekly => 'Every 2 weeks';
+
+  @override
+  String get frequencySemimonthly => 'Twice a month';
+
+  @override
+  String get frequencyMonthly => 'Monthly';
+
+  @override
+  String get onboardingIncomeNextPaydayTitle => 'When is your next payday?';
+
+  @override
+  String get onboardingIncomeSelectPaydayPlaceholder =>
+      'Select upcoming payday';
+
+  @override
+  String get onboardingIncomeTakeHomeTitle =>
+      'How much do you take home each paycheck?';
+
+  @override
+  String get onboardingIncomeNetIncomeLabel => 'Net income per paycheck';
+
+  @override
+  String get onboardingIncomeSpendUntilTitle =>
+      'How much do you have to spend until then?';
+
+  @override
+  String get onboardingIncomeInitialBalanceLabel =>
+      'Spending balance for initial period';
+
+  @override
+  String onboardingIncomeSuggestedBalance(String amount) {
+    return 'Suggested: $amount based on remaining days';
+  }
+
+  @override
+  String get onboardingIncomeCurrentMoneyTitle =>
+      'How much money do you have right now?';
+
+  @override
+  String get onboardingIncomeAvailableSpendingMoneyLabel =>
+      'Available spending money';
+
+  @override
+  String get onboardingIncomePlanDaysTitle => 'Plan ahead for how many days?';
+
+  @override
+  String daysCount(int count) {
+    return '$count days';
+  }
+
+  @override
+  String get recommendedBadge => 'Recommended';
+
+  @override
+  String semanticsCurrencyPicker(String currency) {
+    return 'Select currency, currently $currency';
+  }
+
+  @override
+  String semanticsSelectPayday(String date) {
+    return 'Select upcoming payday date, currently $date';
+  }
+
+  @override
+  String get onboardingBillsTitleFixed =>
+      'Any regular bills before your next payday?';
+
+  @override
+  String onboardingBillsTitleIrregular(int days) {
+    return 'Any regular bills in the next $days days?';
+  }
+
+  @override
+  String get onboardingBillsSubtitle =>
+      'Add upcoming recurring expenses to protect your daily limit.';
+
+  @override
+  String onboardingBillsTotalBeforePayday(String amount) {
+    return 'Bills before payday: $amount';
+  }
+
+  @override
+  String get onboardingBillsEmptyPrompt =>
+      'No bills added yet. Tap a suggestion above or skip to continue.';
+
+  @override
+  String get onboardingBillsSkipForNow => 'Skip for now';
+
+  @override
+  String get addBill => 'Add Bill';
+
+  @override
+  String get editBill => 'Edit Bill';
+
+  @override
+  String get billNameLabel => 'Bill name';
+
+  @override
+  String get billAmountLabel => 'Amount';
+
+  @override
+  String get saveChanges => 'Save Changes';
+
+  @override
+  String get billDueDateLabel => 'First due date';
+
+  @override
+  String get billRecurrenceLabel => 'Repeats';
+
+  @override
+  String get recurrenceWeekly => 'Weekly';
+
+  @override
+  String get recurrenceMonthly => 'Monthly';
+
+  @override
+  String get recurrenceYearly => 'Yearly';
+
+  @override
+  String get validationBillNameRequired => 'Please enter a bill name';
+
+  @override
+  String get validationBillNameTooLong =>
+      'Bill name cannot exceed 40 characters';
+
+  @override
+  String get validationBillAmountPositive => 'Amount must be greater than zero';
+
+  @override
+  String get validationBillDatePast =>
+      'First due date must be on or after today';
 }
