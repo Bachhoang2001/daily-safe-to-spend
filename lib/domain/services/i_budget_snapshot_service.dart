@@ -1,5 +1,6 @@
 import 'package:budget_engine/budget_engine.dart';
 import 'package:get/get.dart';
+import 'package:safe_to_spend/data/models/onboarding_draft.dart';
 
 /// Central reactive service coordinating calculation of the Safe-to-Spend snapshot.
 ///
@@ -30,4 +31,9 @@ abstract class IBudgetSnapshotService {
   ///
   /// Emits `null` when healthy. Contains a user-safe message when calculation fails.
   Rx<String?> get error;
+
+  /// Computes a preview snapshot synchronously in memory from an in-flight [draft].
+  ///
+  /// Does not write to the database or mutate the reactive [snapshot] stream.
+  BudgetSnapshot preview(OnboardingDraft draft);
 }

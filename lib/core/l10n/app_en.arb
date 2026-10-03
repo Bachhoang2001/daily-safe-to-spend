@@ -345,6 +345,62 @@
   "validationBillDatePast": "First due date must be on or after today",
   "@validationBillDatePast": {
     "description": "Validation message when bill first due date is in the past"
+  },
+  "onboardingResultYouCanSpend": "You can spend",
+  "@onboardingResultYouCanSpend": {
+    "description": "Pre-amount text on onboarding result page"
+  },
+  "onboardingResultToday": "today",
+  "@onboardingResultToday": {
+    "description": "Post-amount text on onboarding result page"
+  },
+  "onboardingResultSubtitleFixed": "That's your daily number until payday on {date}.",
+  "@onboardingResultSubtitleFixed": {
+    "description": "Subtitle text for fixed income mode with next payday",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Oct 15"
+      }
+    }
+  },
+  "onboardingResultSubtitleIrregular": "That's your daily number for the next {days} days.",
+  "@onboardingResultSubtitleIrregular": {
+    "description": "Subtitle text for irregular income mode with horizon days",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "14"
+      }
+    }
+  },
+  "onboardingResultDeficitMessage": "Your bills are more than your money until payday — we'll help you track it.",
+  "@onboardingResultDeficitMessage": {
+    "description": "Gentle deficit message when upcoming bills exceed available funds"
+  },
+  "onboardingResultNotificationTitle": "Get your number every morning at 8:00?",
+  "@onboardingResultNotificationTitle": {
+    "description": "Headline on notification pre-prompt card"
+  },
+  "onboardingResultNotificationSubtitle": "A gentle daily reminder so you always know what's safe to spend.",
+  "@onboardingResultNotificationSubtitle": {
+    "description": "Explanation text on notification pre-prompt card"
+  },
+  "onboardingResultNotificationTurnOn": "Turn on",
+  "@onboardingResultNotificationTurnOn": {
+    "description": "Primary action button to request system notification permission"
+  },
+  "onboardingResultNotificationNotNow": "Not now",
+  "@onboardingResultNotificationNotNow": {
+    "description": "Secondary action button to skip notification permission request"
+  },
+  "onboardingResultGoToToday": "Go to Today",
+  "@onboardingResultGoToToday": {
+    "description": "Primary CTA to complete onboarding and enter today screen"
+  },
+  "onboardingResultSaveError": "Failed to save profile. Please try again.",
+  "@onboardingResultSaveError": {
+    "description": "Error message when saving onboarding profile fails"
   }
 }
 

@@ -1,3 +1,4 @@
+import 'package:budget_engine/budget_engine.dart';
 import 'package:drift/drift.dart';
 import 'package:safe_to_spend/core/ids/device_id_provider.dart';
 import 'package:safe_to_spend/core/ids/uuid_generator.dart';
@@ -84,6 +85,38 @@ class ProfileRepository implements IProfileRepository {
       await _db.into(_db.budgetProfilesTable).insert(companion);
     }
     _cachedOnboardingCompleted = profile.onboardingCompleted;
+  }
+
+  @override
+  Future<void> saveOnboarding({
+    required BudgetProfileModel profile,
+    required List<Bill> bills,
+  }) async {
+    await _db.transaction(() async {
+      await saveProfile(profile.copyWith(onboardingCompleted: true));
+      final now = _clock.now().millisecondsSinceEpoch;
+      final deviceId = await _deviceIdProvider.getDeviceId();
+      for (final bill in bills) {
+        await _db
+            .into(_db.billsTable)
+            .insert(
+              BillsTableCompanion(
+                id: Value(bill.id.isNotEmpty ? bill.id : _uuid.generate()),
+                createdAt: Value(now),
+                updatedAt: Value(now),
+                deviceId: Value(deviceId),
+                profileId: Value(profile.id),
+                name: Value(bill.name),
+                amountCents: Value(bill.amount.cents),
+                recurrence: Value(bill.recurrence.name),
+                firstDueDate: Value(bill.firstDueDate.toIsoString()),
+                remindDaysBefore: Value(bill.remindDaysBefore),
+                isActive: Value(bill.isActive),
+              ),
+            );
+      }
+    });
+    _cachedOnboardingCompleted = true;
   }
 
   bool _cachedOnboardingCompleted = false;

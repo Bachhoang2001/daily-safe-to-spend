@@ -261,4 +261,45 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get validationBillDatePast =>
       'First due date must be on or after today';
+
+  @override
+  String get onboardingResultYouCanSpend => 'You can spend';
+
+  @override
+  String get onboardingResultToday => 'today';
+
+  @override
+  String onboardingResultSubtitleFixed(String date) {
+    return 'That\'s your daily number until payday on $date.';
+  }
+
+  @override
+  String onboardingResultSubtitleIrregular(int days) {
+    return 'That\'s your daily number for the next $days days.';
+  }
+
+  @override
+  String get onboardingResultDeficitMessage =>
+      'Your bills are more than your money until payday — we\'ll help you track it.';
+
+  @override
+  String get onboardingResultNotificationTitle =>
+      'Get your number every morning at 8:00?';
+
+  @override
+  String get onboardingResultNotificationSubtitle =>
+      'A gentle daily reminder so you always know what\'s safe to spend.';
+
+  @override
+  String get onboardingResultNotificationTurnOn => 'Turn on';
+
+  @override
+  String get onboardingResultNotificationNotNow => 'Not now';
+
+  @override
+  String get onboardingResultGoToToday => 'Go to Today';
+
+  @override
+  String get onboardingResultSaveError =>
+      'Failed to save profile. Please try again.';
 }

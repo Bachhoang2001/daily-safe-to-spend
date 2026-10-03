@@ -34,6 +34,10 @@ abstract class AnalyticsEvents {
   /// Event emitted when the user finishes onboarding setup.
   static const String onboardingComplete = 'onboarding_complete';
 
+  /// Event emitted when the user responds to the notification permission prompt.
+  static const String notificationPermissionResult =
+      'notification_permission_result';
+
   // Parameter keys
   /// Whether this is the first time the app is launched.
   static const String isFirstOpen = 'is_first_open';

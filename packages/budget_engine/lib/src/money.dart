@@ -62,6 +62,9 @@ class Money implements Comparable<Money> {
   /// ```
   const Money.zero([String currency = defaultCurrency]) : this(0, currency);
 
+  /// Creates a [Money] instance with currency set to USD.
+  const Money.usd(int cents) : this(cents, defaultCurrency);
+
   /// Whether the amount is strictly less than zero.
   ///
   /// Example:

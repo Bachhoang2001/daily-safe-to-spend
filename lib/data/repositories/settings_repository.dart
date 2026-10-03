@@ -47,4 +47,16 @@ class SettingsRepository implements ISettingsRepository {
       _db.appSettingsTable,
     )..where((t) => t.key.equals(key))).go();
   }
+
+  @override
+  Future<bool?> getBool(String key) async {
+    final value = await getString(key);
+    if (value == null) return null;
+    return value.toLowerCase() == 'true';
+  }
+
+  @override
+  Future<void> setBool(String key, bool value) async {
+    await setString(key, value.toString());
+  }
 }

@@ -22,4 +22,6 @@ Các ý tưởng, cải tiến và technical debt ghi nhận trong quá trình p
 - [ ] Onboarding Bills - Quét và nhận diện hóa đơn tự động qua OCR camera hoặc nhập trực tiếp từ ảnh chụp biên lai / file PDF hóa đơn.
 - [ ] Onboarding Bills - Tự động đồng bộ các gói thuê bao định kỳ từ Apple App Store / Google Play Subscriptions hoặc phân tích hóa đơn email receipts.
 - [ ] Onboarding Bills - Hỗ trợ hóa đơn có số tiền biến thiên theo mùa (tiền điện, tiền nước) thay vì chỉ một con số cố định mỗi chu kỳ.
+- [ ] Onboarding Result - Tùy chỉnh trực tiếp giờ nhận thông báo ngay tại thẻ xin quyền onboarding thay vì phải vào Settings (hiện tại mặc định 08:00 sáng).
+- [ ] Onboarding Result - Chia sẻ con số Safe-to-Spend thành tích ban đầu qua ảnh hoặc tin nhắn (Share daily safe target).
 

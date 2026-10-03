@@ -49,19 +49,29 @@ class BudgetSnapshot {
   /// Creates an immutable [BudgetSnapshot].
   const BudgetSnapshot({
     required this.safeToday,
-    required this.dailyAllowanceToday,
-    required this.spentToday,
+    Money? dailyAllowanceToday,
+    Money? dailyBaseline,
+    this.spentToday = const Money(0),
     required this.tomorrowForecast,
     required this.remainingInPeriod,
-    required this.daysLeftInclToday,
-    required this.periodStart,
-    required this.periodEnd,
+    int? daysLeftInclToday,
+    int? daysLeftInPeriod,
+    this.periodStart = const LocalDate(2026, 1, 1),
+    this.periodEnd = const LocalDate(2026, 1, 1),
     required this.status,
     this.upcomingBills = const [],
     this.goalProgress,
     this.shortfall = false,
     this.shortfallAmount = const Money(0),
-  });
+  }) : dailyAllowanceToday =
+           dailyAllowanceToday ?? dailyBaseline ?? const Money(0),
+       daysLeftInclToday = daysLeftInclToday ?? daysLeftInPeriod ?? 1;
+
+  /// Compatibility alias for [daysLeftInclToday].
+  int get daysLeftInPeriod => daysLeftInclToday;
+
+  /// Compatibility alias for [dailyAllowanceToday].
+  Money get dailyBaseline => dailyAllowanceToday;
 
   @override
   bool operator ==(Object other) =>

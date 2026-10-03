@@ -7,6 +7,7 @@ import 'package:rxdart/rxdart.dart' hide Rx;
 
 import 'package:safe_to_spend/core/time/clock.dart';
 import 'package:safe_to_spend/core/time/local_date_timezone.dart';
+import 'package:safe_to_spend/data/models/onboarding_draft.dart';
 import 'package:safe_to_spend/domain/models/budget_profile_model.dart';
 import 'package:safe_to_spend/domain/repositories/i_bill_repository.dart';
 import 'package:safe_to_spend/domain/repositories/i_expense_repository.dart';
@@ -243,6 +244,44 @@ class BudgetSnapshotService extends GetxService
       );
       error.value = 'Failed to refresh budget snapshot';
     }
+  }
+
+  @override
+  BudgetSnapshot preview(OnboardingDraft draft) {
+    final today = LocalDateFromDateTime.fromDateTime(
+      clock.now(),
+      draft.timezone,
+    );
+
+    final config = BudgetConfig(
+      currency: draft.currency,
+      incomeMode: draft.incomeMode,
+      payFrequency: draft.payFrequency,
+      payAnchorDate: draft.payAnchorDate,
+      incomePerPaycheck: draft.incomePerPaycheck,
+      firstPeriodBalance: draft.firstPeriodBalance,
+      startingBalance: draft.startingBalance,
+      trackingStartDate: today,
+      safetyHorizonDays: draft.safetyHorizonDays ?? 14,
+      bufferPercent: draft.bufferPercent,
+      rolloverMode: draft.rolloverMode,
+    );
+
+    final bills = draft.bills
+        .map(
+          (b) => Bill(
+            id: b.id,
+            name: b.name,
+            amount: b.amount,
+            recurrence: b.recurrence,
+            firstDueDate: b.firstDueDate,
+          ),
+        )
+        .toList();
+
+    final input = EngineInput(config: config, bills: bills);
+
+    return computeSnapshot(input, today);
   }
 
   @override

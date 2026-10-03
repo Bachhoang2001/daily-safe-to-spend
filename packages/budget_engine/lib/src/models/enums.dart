@@ -43,7 +43,10 @@ enum BudgetStatus {
   caution,
 
   /// Overspent: `safeToday < 0`.
-  over,
+  over;
+
+  /// Alias for [onTrack].
+  static const BudgetStatus good = BudgetStatus.onTrack;
 }
 
 /// Recurrence schedule for recurring bills.

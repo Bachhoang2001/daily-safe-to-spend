@@ -543,6 +543,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'First due date must be on or after today'**
   String get validationBillDatePast;
+
+  /// Pre-amount text on onboarding result page
+  ///
+  /// In en, this message translates to:
+  /// **'You can spend'**
+  String get onboardingResultYouCanSpend;
+
+  /// Post-amount text on onboarding result page
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get onboardingResultToday;
+
+  /// Subtitle text for fixed income mode with next payday
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s your daily number until payday on {date}.'**
+  String onboardingResultSubtitleFixed(String date);
+
+  /// Subtitle text for irregular income mode with horizon days
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s your daily number for the next {days} days.'**
+  String onboardingResultSubtitleIrregular(int days);
+
+  /// Gentle deficit message when upcoming bills exceed available funds
+  ///
+  /// In en, this message translates to:
+  /// **'Your bills are more than your money until payday — we\'ll help you track it.'**
+  String get onboardingResultDeficitMessage;
+
+  /// Headline on notification pre-prompt card
+  ///
+  /// In en, this message translates to:
+  /// **'Get your number every morning at 8:00?'**
+  String get onboardingResultNotificationTitle;
+
+  /// Explanation text on notification pre-prompt card
+  ///
+  /// In en, this message translates to:
+  /// **'A gentle daily reminder so you always know what\'s safe to spend.'**
+  String get onboardingResultNotificationSubtitle;
+
+  /// Primary action button to request system notification permission
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on'**
+  String get onboardingResultNotificationTurnOn;
+
+  /// Secondary action button to skip notification permission request
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get onboardingResultNotificationNotNow;
+
+  /// Primary CTA to complete onboarding and enter today screen
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Today'**
+  String get onboardingResultGoToToday;
+
+  /// Error message when saving onboarding profile fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save profile. Please try again.'**
+  String get onboardingResultSaveError;
 }
 
 class _AppLocalizationsDelegate

@@ -16,4 +16,11 @@ abstract class ISettingsRepository {
 
   /// Removes the setting entry associated with [key].
   Future<void> remove(String key);
+
+  /// Retrieves the boolean value associated with [key], or `null` if absent.
+  Future<bool?> getBool(String key);
+
+  /// Stores or updates the boolean [value] associated with [key].
+  // ignore: avoid_positional_boolean_parameters
+  Future<void> setBool(String key, bool value);
 }

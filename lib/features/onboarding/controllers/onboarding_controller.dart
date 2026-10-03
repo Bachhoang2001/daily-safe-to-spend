@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:budget_engine/budget_engine.dart';
@@ -10,8 +11,12 @@ import 'package:safe_to_spend/core/time/clock.dart';
 import 'package:safe_to_spend/core/time/local_date_timezone.dart';
 import 'package:safe_to_spend/data/models/date_range.dart';
 import 'package:safe_to_spend/data/models/onboarding_draft.dart';
+import 'package:safe_to_spend/domain/models/budget_profile_model.dart';
+import 'package:safe_to_spend/domain/repositories/i_profile_repository.dart';
 import 'package:safe_to_spend/domain/repositories/i_settings_repository.dart';
 import 'package:safe_to_spend/domain/services/i_analytics_service.dart';
+import 'package:safe_to_spend/domain/services/i_budget_snapshot_service.dart';
+import 'package:safe_to_spend/domain/services/i_notification_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Central controller managing the multi-step onboarding wizard.
@@ -23,7 +28,19 @@ class OnboardingController extends GetxController {
     this.settingsRepo,
     Clock? clock,
     this.urlLauncher,
+    this.snapshotService,
+    this.profileRepo,
+    this.notificationService,
   }) : clock = clock ?? const SystemClock();
+
+  /// Budget snapshot computation service.
+  final IBudgetSnapshotService? snapshotService;
+
+  /// User profile persistence repository.
+  final IProfileRepository? profileRepo;
+
+  /// System notification permission service.
+  final INotificationService? notificationService;
 
   /// Analytics service for tracking onboarding events.
   final IAnalyticsService analytics;
@@ -54,6 +71,15 @@ class OnboardingController extends GetxController {
 
   /// Error message if an error occurs.
   final errorMessage = RxnString();
+
+  /// Calculated budget preview snapshot shown in Step 4.
+  final previewSnapshot = Rxn<BudgetSnapshot>();
+
+  /// Whether database persistence is currently in progress.
+  final isSaving = false.obs;
+
+  /// Whether the notification pre-prompt card has been responded to.
+  final notificationPromptHandled = false.obs;
 
   // --- Step 1: Welcome ---
 
@@ -126,6 +152,9 @@ class OnboardingController extends GetxController {
     }
     saveDraft();
   }
+
+  /// Compatibility alias for [selectFrequency].
+  void setPayFrequency(PayFrequency freq) => selectFrequency(freq);
 
   /// Sets the next upcoming payday.
   ///
@@ -359,6 +388,124 @@ class OnboardingController extends GetxController {
     currentStep.value = 4;
     saveDraft();
     navigator.toNamed<dynamic>(AppRoutes.onboardingResult);
+  }
+
+  // --- Step 4: Result & Notifications ---
+
+  /// Computes and caches a preview [BudgetSnapshot] from the current in-flight draft.
+  BudgetSnapshot computePreview() {
+    final snap =
+        snapshotService?.preview(draft.value) ??
+        const BudgetSnapshot(
+          safeToday: Money(0),
+          tomorrowForecast: Money(0),
+          status: BudgetStatus.good,
+          remainingInPeriod: Money(0),
+          daysLeftInPeriod: 1,
+          dailyBaseline: Money(0),
+        );
+    previewSnapshot.value = snap;
+    return snap;
+  }
+
+  /// Persists onboarding setup atomically in a single transaction and navigates to main shell.
+  Future<void> completeOnboarding() async {
+    if (isSaving.value) return;
+    isSaving.value = true;
+    state.value = ViewState.loading;
+    errorMessage.value = null;
+
+    try {
+      final currentDraft = draft.value;
+      final today = LocalDateFromDateTime.fromDateTime(
+        clock.now(),
+        currentDraft.timezone,
+      );
+
+      final profile = BudgetProfileModel(
+        id: '',
+        config: BudgetConfig(
+          currency: currentDraft.currency,
+          incomeMode: currentDraft.incomeMode,
+          payFrequency: currentDraft.payFrequency,
+          payAnchorDate: currentDraft.payAnchorDate,
+          incomePerPaycheck: currentDraft.incomePerPaycheck,
+          firstPeriodBalance: currentDraft.firstPeriodBalance,
+          startingBalance: currentDraft.startingBalance,
+          trackingStartDate: today,
+          safetyHorizonDays: currentDraft.safetyHorizonDays ?? 14,
+          bufferPercent: currentDraft.bufferPercent,
+          rolloverMode: currentDraft.rolloverMode,
+        ),
+        timezone: currentDraft.timezone,
+        onboardingCompleted: true,
+      );
+
+      final bills = currentDraft.bills
+          .map(
+            (b) => Bill(
+              id: b.id,
+              name: b.name,
+              amount: b.amount,
+              recurrence: b.recurrence,
+              firstDueDate: b.firstDueDate,
+            ),
+          )
+          .toList();
+
+      if (profileRepo != null) {
+        await profileRepo!.saveOnboarding(profile: profile, bills: bills);
+      }
+
+      if (settingsRepo != null) {
+        await settingsRepo!.setString('notification_morning_time', '08:00');
+        await settingsRepo!.setString('notification_evening_time', '20:30');
+        await settingsRepo!.setBool('show_paywall_after_onboarding', false);
+        await settingsRepo!.remove(_draftStorageKey);
+      }
+
+      await analytics.logEvent(
+        AnalyticsEvents.onboardingComplete,
+        parameters: {
+          'income_mode': currentDraft.incomeMode.name,
+          'pay_frequency': currentDraft.payFrequency?.name ?? 'none',
+          'bills_count': currentDraft.bills.length,
+        },
+      );
+
+      state.value = ViewState.success;
+      isSaving.value = false;
+      unawaited(navigator.offAllNamed<dynamic>(AppRoutes.root));
+    } on Object catch (e, st) {
+      state.value = ViewState.error;
+      errorMessage.value = 'Failed to save profile';
+      await analytics.recordError(
+        e,
+        st,
+        reason: 'Failed to complete onboarding',
+      );
+      isSaving.value = false;
+    }
+  }
+
+  /// Requests notification permissions via the system dialog and logs analytics.
+  Future<bool> requestNotifications() async {
+    notificationPromptHandled.value = true;
+    final granted = (await notificationService?.requestPermission()) ?? false;
+    await analytics.logEvent(
+      AnalyticsEvents.notificationPermissionResult,
+      parameters: {'granted': granted},
+    );
+    return granted;
+  }
+
+  /// Dismisses the notification pre-prompt without requesting system permissions.
+  Future<void> skipNotifications() async {
+    notificationPromptHandled.value = true;
+    await analytics.logEvent(
+      AnalyticsEvents.notificationPermissionResult,
+      parameters: {'granted': false, 'action': 'not_now'},
+    );
   }
 
   // --- Draft Persistence ---

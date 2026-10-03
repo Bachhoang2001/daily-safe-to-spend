@@ -6,6 +6,7 @@ import 'package:safe_to_spend/core/navigation/navigator.dart';
 import 'package:safe_to_spend/core/routes/app_routes.dart';
 import 'package:safe_to_spend/core/state/view_state.dart';
 import 'package:safe_to_spend/data/models/onboarding_draft.dart';
+import 'package:safe_to_spend/domain/models/budget_profile_model.dart';
 import 'package:safe_to_spend/features/onboarding/controllers/onboarding_controller.dart';
 
 import '../../../helpers/fake_clock.dart';
@@ -13,10 +14,21 @@ import '../../../helpers/mock_services.dart';
 
 class MockNavigator extends Mock implements INavigator {}
 
+class FakeBudgetProfileModel extends Fake implements BudgetProfileModel {}
+
 void main() {
+  setUpAll(() {
+    registerFallbackValue(FakeBudgetProfileModel());
+    registerFallbackValue(const <Bill>[]);
+    registerFallbackValue(const OnboardingDraft());
+  });
+
   late MockAnalyticsService mockAnalytics;
   late MockNavigator mockNavigator;
   late MockSettingsRepository mockSettings;
+  late MockProfileRepository mockProfileRepo;
+  late MockBudgetSnapshotService mockSnapshotService;
+  late MockNotificationService mockNotificationService;
   late FakeClock fakeClock;
   late OnboardingController controller;
 
@@ -24,6 +36,9 @@ void main() {
     mockAnalytics = MockAnalyticsService();
     mockNavigator = MockNavigator();
     mockSettings = MockSettingsRepository();
+    mockProfileRepo = MockProfileRepository();
+    mockSnapshotService = MockBudgetSnapshotService();
+    mockNotificationService = MockNotificationService();
     fakeClock = FakeClock(DateTime.utc(2026, 1, 1, 12));
 
     when(
@@ -37,6 +52,8 @@ void main() {
 
     when(() => mockSettings.setString(any(), any())).thenAnswer((_) async {});
     when(() => mockSettings.getString(any())).thenAnswer((_) async => null);
+    when(() => mockSettings.setBool(any(), any())).thenAnswer((_) async {});
+    when(() => mockSettings.getBool(any())).thenAnswer((_) async => null);
     when(() => mockSettings.remove(any())).thenAnswer((_) async {});
 
     when(
@@ -47,12 +64,37 @@ void main() {
       ),
     ).thenAnswer((_) async => null);
 
+    when(
+      () => mockNavigator.offAllNamed<dynamic>(
+        any(),
+        arguments: any<dynamic>(named: 'arguments'),
+        parameters: any(named: 'parameters'),
+      ),
+    ).thenAnswer((_) async => null);
+
+    when(
+      () => mockProfileRepo.saveOnboarding(
+        profile: any(named: 'profile'),
+        bills: any(named: 'bills'),
+      ),
+    ).thenAnswer((_) async {});
+
+    when(
+      () => mockNotificationService.hasPermission(),
+    ).thenAnswer((_) async => false);
+    when(
+      () => mockNotificationService.requestPermission(),
+    ).thenAnswer((_) async => true);
+
     controller = OnboardingController(
       analytics: mockAnalytics,
       navigator: mockNavigator,
       settingsRepo: mockSettings,
       clock: fakeClock,
       urlLauncher: (uri) async => true,
+      snapshotService: mockSnapshotService,
+      profileRepo: mockProfileRepo,
+      notificationService: mockNotificationService,
     );
   });
 
@@ -671,6 +713,214 @@ void main() {
         expect(controller.draft.value.bills.length, equals(1));
         expect(controller.draft.value.bills.first.id, equals('bill-1'));
         expect(controller.billsTotalBeforePayday, equals(const Money(100000)));
+      },
+    );
+  });
+
+  group('OnboardingController - Result (T09-1..T09-5)', () {
+    test(
+      'T09-1: computePreview delegates to snapshotService.preview(draft) and updates previewSnapshot',
+      () {
+        controller
+          ..selectIncomeMode(IncomeMode.fixed)
+          ..setIncomePerPaycheck(const Money(300000))
+          ..setPayFrequency(PayFrequency.biweekly)
+          ..setNextPayday(const LocalDate(2026, 1, 15));
+
+        const expectedSnapshot = BudgetSnapshot(
+          safeToday: Money(4200),
+          tomorrowForecast: Money(4200),
+          status: BudgetStatus.good,
+          remainingInPeriod: Money(42000),
+          daysLeftInPeriod: 10,
+          dailyBaseline: Money(4200),
+        );
+
+        when(
+          () => mockSnapshotService.preview(any()),
+        ).thenReturn(expectedSnapshot);
+
+        final snapshot = controller.computePreview();
+
+        expect(snapshot, equals(expectedSnapshot));
+        expect(controller.previewSnapshot.value, equals(expectedSnapshot));
+        verify(
+          () => mockSnapshotService.preview(controller.draft.value),
+        ).called(1);
+      },
+    );
+
+    test(
+      'T09-2: completeOnboarding saves profile with onboardingCompleted=true and bills in one transaction, writes default settings, removes draft, logs onboarding_complete, and navigates to AppRoutes.root',
+      () async {
+        controller
+          ..selectIncomeMode(IncomeMode.fixed)
+          ..setIncomePerPaycheck(const Money(300000))
+          ..setPayFrequency(PayFrequency.biweekly)
+          ..setNextPayday(const LocalDate(2026, 1, 15))
+          ..addDraftBill(
+            const OnboardingBillDraft(
+              id: 'b-1',
+              name: 'Internet',
+              amount: Money(6000),
+              recurrence: BillRecurrence.monthly,
+              firstDueDate: LocalDate(2026, 1, 10),
+            ),
+          );
+
+        await controller.completeOnboarding();
+
+        verify(
+          () => mockProfileRepo.saveOnboarding(
+            profile: any(
+              named: 'profile',
+              that: isA<BudgetProfileModel>().having(
+                (p) => p.onboardingCompleted,
+                'onboardingCompleted',
+                isTrue,
+              ),
+            ),
+            bills: any(named: 'bills', that: hasLength(1)),
+          ),
+        ).called(1);
+
+        verify(
+          () => mockSettings.setString('notification_morning_time', '08:00'),
+        ).called(1);
+        verify(
+          () => mockSettings.setString('notification_evening_time', '20:30'),
+        ).called(1);
+        verify(
+          () => mockSettings.setBool('show_paywall_after_onboarding', false),
+        ).called(1);
+        verify(() => mockSettings.remove('onboarding_draft')).called(1);
+
+        verify(
+          () => mockAnalytics.logEvent(
+            AnalyticsEvents.onboardingComplete,
+            parameters: any(named: 'parameters'),
+          ),
+        ).called(1);
+
+        verify(
+          () => mockNavigator.offAllNamed<dynamic>(AppRoutes.root),
+        ).called(1);
+      },
+    );
+
+    test(
+      'T09-3: completeOnboarding on database failure keeps draft, sets ViewState.error, records analytics, and resets isSaving',
+      () async {
+        controller
+          ..selectIncomeMode(IncomeMode.fixed)
+          ..setIncomePerPaycheck(const Money(300000));
+
+        final dbException = Exception('Database transaction failed');
+        when(
+          () => mockProfileRepo.saveOnboarding(
+            profile: any(named: 'profile'),
+            bills: any(named: 'bills'),
+          ),
+        ).thenThrow(dbException);
+
+        await controller.completeOnboarding();
+
+        verifyNever(() => mockSettings.remove('onboarding_draft'));
+        verifyNever(() => mockNavigator.offAllNamed<dynamic>(any()));
+
+        expect(controller.state.value, equals(ViewState.error));
+        expect(controller.errorMessage.value, isNotNull);
+        expect(controller.isSaving.value, isFalse);
+
+        verify(
+          () => mockAnalytics.recordError(
+            dbException,
+            any(),
+            reason: any(named: 'reason'),
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      'T09-4: skipNotifications logs analytics with granted: false and does not call notificationService.requestPermission',
+      () async {
+        await controller.skipNotifications();
+
+        verifyNever(() => mockNotificationService.requestPermission());
+        verify(
+          () => mockAnalytics.logEvent(
+            AnalyticsEvents.notificationPermissionResult,
+            parameters: any(
+              named: 'parameters',
+              that: containsPair('granted', false),
+            ),
+          ),
+        ).called(1);
+        expect(controller.notificationPromptHandled.value, isTrue);
+      },
+    );
+
+    test(
+      'T09-4: requestNotifications calls notificationService.requestPermission and logs analytics with result',
+      () async {
+        when(
+          () => mockNotificationService.requestPermission(),
+        ).thenAnswer((_) async => true);
+
+        final granted = await controller.requestNotifications();
+
+        expect(granted, isTrue);
+        verify(() => mockNotificationService.requestPermission()).called(1);
+        verify(
+          () => mockAnalytics.logEvent(
+            AnalyticsEvents.notificationPermissionResult,
+            parameters: any(
+              named: 'parameters',
+              that: containsPair('granted', true),
+            ),
+          ),
+        ).called(1);
+        expect(controller.notificationPromptHandled.value, isTrue);
+      },
+    );
+
+    test(
+      'T09-5: computePreview with deficit pool computes BudgetStatus.over and non-positive safeToday',
+      () {
+        const deficitSnapshot = BudgetSnapshot(
+          safeToday: Money.usd(0),
+          tomorrowForecast: Money.usd(0),
+          status: BudgetStatus.over,
+          remainingInPeriod: Money.usd(-5000),
+          daysLeftInPeriod: 10,
+          dailyBaseline: Money.usd(0),
+        );
+
+        when(
+          () => mockSnapshotService.preview(any()),
+        ).thenReturn(deficitSnapshot);
+
+        final result = controller.computePreview();
+
+        expect(result.status, equals(BudgetStatus.over));
+        expect(result.safeToday.cents, lessThanOrEqualTo(0));
+      },
+    );
+
+    test(
+      'T09-AntiDoubleTap: completeOnboarding ignores subsequent calls while isSaving is true',
+      () async {
+        controller.isSaving.value = true;
+
+        await controller.completeOnboarding();
+
+        verifyNever(
+          () => mockProfileRepo.saveOnboarding(
+            profile: any(named: 'profile'),
+            bills: any(named: 'bills'),
+          ),
+        );
       },
     );
   });

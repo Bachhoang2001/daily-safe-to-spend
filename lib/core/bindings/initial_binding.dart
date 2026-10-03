@@ -15,6 +15,7 @@ import 'package:safe_to_spend/data/repositories/settings_repository.dart';
 import 'package:safe_to_spend/data/services/budget_snapshot_service.dart';
 import 'package:safe_to_spend/data/services/deep_link_service.dart';
 import 'package:safe_to_spend/data/services/noop_analytics_service.dart';
+import 'package:safe_to_spend/data/services/notification_service.dart';
 
 import 'package:safe_to_spend/domain/repositories/i_bill_repository.dart';
 import 'package:safe_to_spend/domain/repositories/i_category_repository.dart';
@@ -26,6 +27,7 @@ import 'package:safe_to_spend/domain/repositories/i_settings_repository.dart';
 import 'package:safe_to_spend/domain/services/i_analytics_service.dart';
 import 'package:safe_to_spend/domain/services/i_budget_snapshot_service.dart';
 import 'package:safe_to_spend/domain/services/i_deep_link_service.dart';
+import 'package:safe_to_spend/domain/services/i_notification_service.dart';
 
 /// Global initial binding for long-lived application services & repositories.
 class InitialBinding extends Bindings {
@@ -124,6 +126,7 @@ class InitialBinding extends Bindings {
         StartupTaskRunner(analytics: Get.find()),
         permanent: true,
       )
+      ..put<INotificationService>(NotificationService(), permanent: true)
       ..put<INavigator>(const AppNavigator(), permanent: true);
   }
 }

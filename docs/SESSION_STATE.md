@@ -1,5 +1,5 @@
 # Session State
-_Cập nhật: 2026-10-03 · Spec vừa xong: 009 · Spec tiếp theo: 010_
+_Cập nhật: 2026-10-03 · Spec vừa xong: 010 · Spec tiếp theo: 011_
 
 ## Tiến độ
 | Spec | Feature | Trạng thái | Tests (pass/total) | Analyze (warnings) | Ngày |
@@ -13,7 +13,7 @@ _Cập nhật: 2026-10-03 · Spec vừa xong: 009 · Spec tiếp theo: 010_
 | 007 | Onboarding welcome | DONE | 98/98 (flutter) / 75/75 (engine) / 173/173 (total) | 0 | 2026-10-02 |
 | 008 | Onboarding income | DONE | 140/140 (flutter) / 75/75 (engine) / 215/215 (total) | 0 | 2026-10-02 |
 | 009 | Onboarding bills | DONE | 161/161 (flutter) / 75/75 (engine) / 236/236 (total) | 0 | 2026-10-03 |
-| 010 | Onboarding result | TODO | – | – | – |
+| 010 | Onboarding result | DONE | 187/187 (flutter) / 75/75 (engine) / 262/262 (total) | 0 | 2026-10-03 |
 | 011 | Today | TODO | – | – | – |
 | 012 | Quick add | TODO | – | – | – |
 | 013 | History | TODO | – | – | – |
@@ -313,20 +313,37 @@ Trạng thái: TODO · IN_PROGRESS (<bước>) · BLOCKED (<lý do>) · DONE
   - Fixed mode: Cửa sổ tính toán là $[today \dots nextPayday - 1]$ (chỉ tính các lần xuất hiện trước ngày nhận lương tiếp theo).
   - Irregular mode: Cửa sổ tính toán là $[today \dots today + safetyHorizonDays - 1]$.
   - Trả về `Money.zero(currency)` nếu không có hóa đơn hoặc $windowEnd < today$.
+- **`INotificationService` & Xin quyền thông báo (Spec 010 & 018):**
+  - Trừu tượng hóa dịch vụ thông báo qua domain interface `INotificationService` (`lib/domain/services/i_notification_service.dart`) và data implementation `NotificationService` (`lib/data/services/notification_service.dart`).
+  - Hỗ trợ 2 phương thức chính: `Future<bool> requestPermission()` và `Future<bool> hasPermission()`.
+  - Phân tách luồng xin quyền: Dùng thẻ pre-prompt card giải thích trước ("Get your number every morning at 8:00?") với 2 nút "Turn on" và "Not now". Chỉ gọi hộp thoại hệ thống khi người dùng chủ động bấm "Turn on". Bấm "Not now" đóng thẻ nhẹ nhàng mà không bao giờ trigger OS prompt.
+  - Xử lý nền tảng (Platform Isolation): Tự động cô lập khác biệt giữa Android 13+ (runtime permission `POST_NOTIFICATIONS`) và iOS (`UNNotificationSettings` / `requestPermissions`), fallback an toàn trên Android cũ. Mockable 100% trong test với `mocktail`.
+  - Ghi nhận Analytics event: `notification_permission_result` (`granted: true/false`).
+- **Giờ thông báo mặc định & Cấu hình trong `app_settings` (Spec 010, 018 & 022):**
+  - `notification_morning_time`: `'08:00'` (giờ thông báo buổi sáng nhắc Safe-to-Spend trong ngày).
+  - `notification_evening_time`: `'20:30'` (giờ thông báo buổi tối nhắc nhập chi tiêu trong ngày).
+  - `show_paywall_after_onboarding`: `'false'` (cờ cấu hình cho Spec 022 thử nghiệm paywall sau onboarding, mặc định không bật trong MVP).
+- **Ghi dữ liệu nguyên tử trong một Transaction (`IProfileRepository.saveOnboarding` - Spec 010):**
+  - Đóng gói toàn bộ thao tác lưu Profile (`insert/replace`) và batch Bills vào một SQLite transaction duy nhất qua `_db.transaction(...)`.
+  - Đảm bảo tính toàn vẹn ACID: nếu bất kỳ hóa đơn nào bị lỗi, toàn bộ transaction rollback 100%, không bao giờ tạo orphan profile hoặc dữ liệu dở dang.
+  - Xóa draft trong `app_settings` (`onboarding_draft`) **chỉ sau khi** transaction lưu DB hoàn tất thành công. Nếu có lỗi phát sinh, draft vẫn nguyên vẹn trên disk để người dùng có thể bấm "Try again" mà không mất công nhập lại.
+- **Tính toán kết quả Safe-to-Spend trên bộ nhớ tạm (`IBudgetSnapshotService.preview(draft)` - Spec 010):**
+  - Cho phép màn Result tính toán tức thì con số "You can spend $XX today" và dòng phụ thời hạn (Fixed: cho tới payday kế tiếp; Irregular: cho 14 ngày safety horizon) trực tiếp từ `OnboardingDraft` mà không phụ thuộc vào dữ liệu DB đã lưu.
+  - Nếu hóa đơn vượt quá thu nhập (pool âm / thâm hụt), snapshot chuyển sang `BudgetStatus.over` và hiển thị banner thông điệp nhẹ nhàng: *"Your bills are more than your money until payday — we'll help you track it."* mà vẫn cho phép người dùng tiếp tục vào app.
 - **Quy ước Git:** Xong mỗi spec (tính năng), USER sẽ tự thực hiện `git commit` và `git push` code. Agent tuyệt đối không tự ý chạy git commit hoặc push.
 
 ## Known issues / Tech debt
-- Không có issue hoặc tech debt phát sinh từ Spec 009. Đạt 100% test pass (236/236 tests: 161 flutter + 75 engine), 0 analyze issue (zero-warning), 0 vi phạm double, 100% DoD đạt.
-- 5 điểm cải tiến kỹ thuật trong Spec 009 đã được hoàn thành:
-  1. Responsive Dynamic Type 2.0x: Sửa lỗi RenderFlex overflow 150px tại thẻ dòng tổng trước ngày lương bằng cách chuyển `child: Row(...)` thành `child: Text(...)` trực tiếp trong `Container` có `width: double.infinity`.
-  2. Bọc `ChoiceChip` bằng `Wrap`: Đảm bảo các nút chọn chu kỳ lặp Weekly, Monthly, Yearly tự động xuống dòng an toàn trên màn hình hẹp khi người dùng phóng to font chữ.
-  3. Phân biệt nhãn nút `saveChanges`: Đổi nhãn nút submit của `BillFormSheet` sang `l10n.saveChanges` ("Save Changes") để phân biệt rõ với tiêu đề modal `l10n.addBill` ("Add Bill"), tối ưu cho accessibility và widget test.
-  4. Linter clean: Chuyển `textScale: 2.0` thành `textScale: 2` trong widget test để tuân thủ luật `prefer_int_literals`.
-  5. Loại bỏ Flaky race condition trong `budget_snapshot_service_test`: Khắc phục race condition của reactive debounce pipeline bằng cách cung cấp `debounceDuration: Duration.zero` trong test fixture.
-- Các ý tưởng ngoài phạm vi MVP (quét hóa đơn OCR, đồng bộ store subscriptions, hóa đơn biến thiên theo mùa) đã được cập nhật vào `docs/BACKLOG.md`.
+- Không có issue hoặc tech debt phát sinh từ Spec 010. Đạt 100% test pass (262/262 tests: 187 flutter + 75 engine), 0 analyze issue (zero-warning), 0 vi phạm double, 100% DoD đạt.
+- 5 điểm cải tiến kỹ thuật trong Spec 010 đã được hoàn thành:
+  1. Responsive Dynamic Type 2.0x cho Thẻ quyền thông báo: Thay thế `Row` ngang bằng `Wrap(alignment: WrapAlignment.end, ...)` để các nút "Not now" và "Turn on" tự động xuống dòng an toàn khi phóng to cỡ chữ cực đại, khắc phục triệt để lỗi tràn pixel (77px overflow).
+  2. Quản lý vòng đời AnimationController an toàn: Khởi tạo trong `initState()` với `SingleTickerProviderStateMixin` và hủy triệt để trong `dispose()` qua `_animationController.dispose()`. Tôn trọng cài đặt `reduced motion` (khi bật, nhảy ngay tới số đích không chạy animation 800ms).
+  3. Linter clean: Sắp xếp lại thứ tự imports (`directives_ordering`) trong golden tests, đưa `flutter analyze` về 0 issue.
+  4. Baseline Golden Snapshots: Tạo 5 snapshot golden chuẩn mực cho Light mode, Dark mode, Deficit state và Dynamic Type 2.0x.
+  5. Error Boundary & Retry: Khối try-catch trong `completeOnboarding()` bảo vệ luồng ghi DB, bắt lỗi an toàn và hiển thị thông báo lỗi thân thiện cho phép bấm "Try again", đồng thời log analytics lỗi không kèm dữ liệu tài chính nhạy cảm.
+- Các ý tưởng ngoài phạm vi MVP (tùy chỉnh giờ thông báo ngay trên card onboarding, chia sẻ số safe-to-spend qua ảnh) đã được cập nhật vào `docs/BACKLOG.md`.
 
 ## Next
-- Spec 010 · Onboarding 4: Result reveal & quyền thông báo (file `specs/010-onboarding-result.md`).
+- Spec 011 · Today screen (file `specs/011-today.md`).
 
 
 

@@ -5,6 +5,7 @@ import 'package:safe_to_spend/core/routes/middlewares/onboarding_middleware.dart
 import 'package:safe_to_spend/features/onboarding/bindings/onboarding_binding.dart';
 import 'package:safe_to_spend/features/onboarding/pages/income_setup_page.dart';
 import 'package:safe_to_spend/features/onboarding/pages/onboarding_bills_page.dart';
+import 'package:safe_to_spend/features/onboarding/pages/onboarding_result_page.dart';
 import 'package:safe_to_spend/features/onboarding/pages/welcome_page.dart';
 import 'package:safe_to_spend/features/root/bindings/root_shell_binding.dart';
 import 'package:safe_to_spend/features/root/pages/root_shell_page.dart';
@@ -51,7 +52,7 @@ abstract class AppPages {
     ),
     GetPage<dynamic>(
       name: AppRoutes.onboardingResult,
-      page: () => const _PlaceholderScreen(title: 'Onboarding Result'),
+      page: () => const OnboardingResultPage(),
       binding: OnboardingBinding(),
     ),
     GetPage<dynamic>(

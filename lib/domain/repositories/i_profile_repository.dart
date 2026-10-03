@@ -1,3 +1,4 @@
+import 'package:budget_engine/budget_engine.dart';
 import 'package:safe_to_spend/domain/models/budget_profile_model.dart';
 
 /// Contract for managing user budget profiles and onboarding state.
@@ -25,6 +26,15 @@ abstract class IProfileRepository {
   /// the original creation timestamp. If no active profile exists, a new record
   /// is inserted with fresh audit timestamps and device identifier.
   Future<void> saveProfile(BudgetProfileModel profile);
+
+  /// Persists onboarding setup atomically in a single database transaction.
+  ///
+  /// Writes the active [profile] with onboarding completed flag set to true,
+  /// and batch inserts all initial recurring [bills].
+  Future<void> saveOnboarding({
+    required BudgetProfileModel profile,
+    required List<Bill> bills,
+  });
 
   /// Checks whether the user has completed the initial onboarding setup.
   ///
